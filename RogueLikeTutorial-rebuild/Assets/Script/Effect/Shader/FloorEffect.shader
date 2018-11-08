@@ -66,12 +66,10 @@
 				fixed4 colors[2];
 				colors[0] = _Color1;
 				colors[1] = _Color2;
-				for(fixed iter = 0; iter < 2; ++iter)
-				{
-					fixed lerpVal = iter % 2;
-					_CurrentLightUp %= 2;
-					colors[iter] = lerp(colors[iter], fixed4(1, 1, 1, 1), abs(_CurrentLightUp - lerpVal));
-				}
+				fixed lerpVal = index % 2;
+				_CurrentLightUp %= 2;
+				colors[index] = lerp(colors[index], fixed4(1, 1, 1, 1), abs(_CurrentLightUp - lerpVal));
+				
 				fixed4 texOrign = tex2D(_MainTex, i.uv);
 				fixed4 col = lerp(texOrign, texOrign * colors[index], _EffectValue);
 				return col;
