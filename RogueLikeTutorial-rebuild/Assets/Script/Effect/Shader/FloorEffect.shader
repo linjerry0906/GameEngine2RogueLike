@@ -3,6 +3,7 @@
 	Properties
 	{
 		_MainTex ("Texture", 2D) = "white" {}
+		_GridTex ("GridTex", 2D) = "white" {}
 		_EffectValue ("EffectValue", Range(0, 1)) = 1
 		_Color1 ("Color1", Color) = (0, 0, 0, 0)
 		_Color2 ("Color2", Color) = (0, 0, 0, 0)
@@ -54,6 +55,7 @@
 			}
 			
 			sampler2D _MainTex;
+			sampler2D _GridTex;
 			fixed4 _Color1;
 			fixed4 _Color2;
 			fixed _EffectValue;
@@ -66,12 +68,16 @@
 				fixed4 colors[2];
 				colors[0] = _Color1;
 				colors[1] = _Color2;
-				fixed lerpVal = index % 2;
-				_CurrentLightUp %= 2;
-				colors[index] = lerp(colors[index], fixed4(1, 1, 1, 1), abs(_CurrentLightUp - lerpVal));
-				
+				fixed lerpVal = index % 2.0;
+				_CurrentLightUp %= 2.0;
+				lerpVal = abs(_CurrentLightUp - lerpVal);
+				colors[index] = lerp(colors[index], fixed4(1, 1, 1, 1), lerpVal);
+
 				fixed4 texOrign = tex2D(_MainTex, i.uv);
-				fixed4 col = lerp(texOrign, texOrign * colors[index], _EffectValue);
+				fixed4 grid = tex2D(_GridTex, i.uv);
+				fixed4 finalGrid = texOrign * colors[index];
+				finalGrid = lerp(finalGrid, grid * colors[index], grid.a * (1 - lerpVal));
+				fixed4 col = lerp(texOrign, finalGrid, _EffectValue);
 				return col;
 			}
 			ENDCG
