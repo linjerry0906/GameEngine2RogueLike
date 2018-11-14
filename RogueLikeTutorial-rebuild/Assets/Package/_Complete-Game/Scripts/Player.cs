@@ -23,6 +23,9 @@ namespace Completed
 		
 		private Animator animator;					//Used to store a reference to the Player's animator component.
 		private int food;                           //Used to store player food points total during level.
+
+        public static bool Ispoison;
+        public static int poi_Damage;
 #if UNITY_IOS || UNITY_ANDROID || UNITY_WP8 || UNITY_IPHONE
         private Vector2 touchOrigin = -Vector2.one;	//Used to store location of screen touch origin for mobile controls.
 #endif
@@ -42,6 +45,8 @@ namespace Completed
 			
 			//Call the Start function of the MovingObject base class.
 			base.Start ();
+            Ispoison = false;
+            poi_Damage = 0;
 		}
 		
 		
@@ -124,18 +129,34 @@ namespace Completed
 				//Pass in horizontal and vertical as parameters to specify the direction to move Player in.
 				AttemptMove<Wall> (horizontal, vertical);
 			}
+            if (poi_Damage <= 0) {
+                Ispoison = false;
+                transform.GetComponent<SpriteRenderer>().color = Color.white;
+            }
 		}
 		
 		//AttemptMove overrides the AttemptMove function in the base class MovingObject
 		//AttemptMove takes a generic parameter T which for Player will be of the type Wall, it also takes integers for x and y direction to move in.
 		protected override void AttemptMove <T> (int xDir, int yDir)
 		{
-			//Every time player moves, subtract from food points total.
-			food--;
-			
-			//Update food text display to reflect current score.
-			foodText.text = "Food: " + food;
-			
+            if (Ispoison)
+            {
+                food -= 2;
+                poi_Damage--;
+                foodText.text = "-" + 2 + " Food: " + food;
+                transform.GetComponent<SpriteRenderer>().color = new Color(1, 0, 1);
+            }
+            else
+            {
+                //Every time player moves, subtract from food points total.
+                food--;
+                //Update food text display to reflect current score.
+                foodText.text = "Food: " + food;
+            }
+
+            Debug.Log(Ispoison);
+
+
 			//Call the AttemptMove method of the base class, passing in the component T (in this case Wall) and x and y direction to move.
 			base.AttemptMove <T> (xDir, yDir);
 			
@@ -155,21 +176,22 @@ namespace Completed
 			//Set the playersTurn boolean of GameManager to false now that players turn is over.
 			GameManager.instance.playersTurn = false;
 		}
-		
-		
+				
 		//OnCantMove overrides the abstract function OnCantMove in MovingObject.
 		//It takes a generic parameter T which in the case of Player is a Wall which the player can attack and destroy.
 		protected override void OnCantMove <T> (T component)
 		{
-			//Set hitWall to equal the component passed in as a parameter.
-			Wall hitWall = component as Wall;
+            //componentに誰が入っているのか？
+            Debug.Log("component : " + component);
+            //Set hitWall to equal the component passed in as a parameter.
+            Wall hitWall = component as Wall;
 			
 			//Call the DamageWall function of the Wall we are hitting.
 			hitWall.DamageWall (wallDamage);
 			
 			//Set the attack trigger of the player's animation controller in order to play the player's attack animation.
 			animator.SetTrigger ("playerChop");
-		}
+        }
 		
 		
 		//OnTriggerEnter2D is sent when another object enters a trigger collider attached to this object (2D physics only).

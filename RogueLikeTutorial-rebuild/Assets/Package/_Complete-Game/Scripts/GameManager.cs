@@ -155,7 +155,7 @@ namespace Completed
 			yield return new WaitForSeconds(turnDelay);
 			
 			//If there are no enemies spawned (IE in first level):
-			if (enemies.Count == 0) 
+			if (enemies.Count == 0)
 			{
 				//Wait for turnDelay seconds between moves, replaces delay caused by enemies moving when there are none.
 				yield return new WaitForSeconds(turnDelay);
