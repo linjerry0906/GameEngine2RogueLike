@@ -8,8 +8,7 @@ namespace Completed
 	{
 		public float moveTime = 0.1f;			//Time it will take object to move, in seconds.
 		public LayerMask blockingLayer;			//Layer on which collision will be checked.
-		
-		
+				
 		private BoxCollider2D boxCollider; 		//The BoxCollider2D component attached to this object.
 		private Rigidbody2D rb2D;				//The Rigidbody2D component attached to this object.
 		private float inverseMoveTime;			//Used to make movement more efficient.
@@ -98,23 +97,22 @@ namespace Completed
 			
 			//Set canMove to true if Move was successful, false if failed.
 			bool canMove = Move (xDir, yDir, out hit);
-			
-			//Check if nothing was hit by linecast
-			if(hit.transform == null)
-				//If nothing was hit, return and don't execute further code.
-				return;
-			
+
+            //Check if nothing was hit by linecast
+            if (hit.transform == null)
+                //If nothing was hit, return and don't execute further code.
+                return;
+
 			//Get a component reference to the component of type T attached to the object that was hit
 			T hitComponent = hit.transform.GetComponent <T> ();
-			
+
 			//If canMove is false and hitComponent is not equal to null, meaning MovingObject is blocked and has hit something it can interact with.
 			if(!canMove && hitComponent != null)
 				
 				//Call the OnCantMove function and pass it hitComponent as a parameter.
 				OnCantMove (hitComponent);
-		}
-		
-		
+		}				
+
 		//The abstract modifier indicates that the thing being modified has a missing or incomplete implementation.
 		//OnCantMove will be overriden by functions in the inheriting classes.
 		protected abstract void OnCantMove <T> (T component)
