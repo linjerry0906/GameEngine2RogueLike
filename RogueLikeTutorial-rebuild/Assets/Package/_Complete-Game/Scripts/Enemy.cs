@@ -127,7 +127,7 @@ namespace Completed
                 else
                     xDir = targetWall.position.x > transform.position.x ? 1 : -1;
 
-                AttemptMove<Wall>(xDir, yDir);
+                AttemptMove<Destroyable>(xDir, yDir);
 
                 Debug.Log(targetWall);
             }
@@ -165,10 +165,10 @@ namespace Completed
             if (component.tag == "Wall")
             {
                 //Set hitWall to equal the component passed in as a parameter.
-                Wall hitWall = component as Wall;
+                Destroyable hitWall = component as Destroyable;
 
                 //Call the DamageWall function of the Wall we are hitting.
-                hitWall.DamageWall(wallDamage);
+                hitWall.Damaged(wallDamage);
             }
         }
 
