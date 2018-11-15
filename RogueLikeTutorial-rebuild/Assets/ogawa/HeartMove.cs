@@ -5,33 +5,22 @@ using UnityEngine;
 //小川
 public class HeartMove : MonoBehaviour
 {
-    [SerializeField] float magnification;
-    [SerializeField] float interval;
-    [SerializeField] float waitTime;
+    [SerializeField] float speed;
+    HeartAnime anim;
     bool isStart;
     // Use this for initialization
     void Start()
     {
-
+        anim = gameObject.AddComponent<HeartAnime>();
+        anim.SetSpeed(speed);
     }
 
-    // Update is called once per frame
-    void Update()
+    public IEnumerator Move(float wait)
     {
-
-    }
-
-    public IEnumerator Move()
-    {
-
-        yield return new WaitForSeconds(waitTime);
-
-        Vector3 scale = transform.localScale;
-        transform.localScale = transform.localScale * magnification;
-
-        yield return new WaitForSeconds(interval);
-        transform.localScale = scale;
-
-        yield break;
+        while (true)
+        {
+            yield return new WaitForSeconds(wait);
+            anim.Play();
+        }
     }
 }

@@ -45,6 +45,7 @@ public class MusicManager : MonoBehaviour
         barBox1 = new Queue<GameObject>();
         barBox2 = new Queue<GameObject>();
         StartCoroutine(Generate());
+        StartCoroutine(heartMove.Move(interval));
     }
 
     private void Update()
@@ -59,8 +60,6 @@ public class MusicManager : MonoBehaviour
     {
         while (true)
         {
-
-            StartCoroutine(heartMove.Move());
             for (int i = 0; i < generateObj.Length; i++)
             {
                 var obj = Instantiate(generateObj[i].transform.GetChild(0).gameObject, generateObj[i].transform.position,
@@ -78,7 +77,6 @@ public class MusicManager : MonoBehaviour
                 }
             }
             yield return new WaitForSeconds(interval);
-            //Debug.Log(barBox1.Dequeue());
         }
     }
 

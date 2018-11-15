@@ -15,6 +15,25 @@ public class DistanceCheck : MonoBehaviour
         isSuccess = false;
     }
 
+    private void Update()
+    {
+        if (MusicManager.Instance[0].Peek() != null && MusicManager.Instance[0].Peek() != null)
+        {
+            var bar1 = MusicManager.Instance[0].Peek();
+            var bar2 = MusicManager.Instance[1].Peek();
+
+            if (bar1.GetComponent<PassCheck>().IsPass && bar2.GetComponent<PassCheck>().IsPass)
+            {
+                var bar1_bar2 = Vector2.Distance(bar1.transform.position, bar2.transform.position);
+
+                if (bar1_bar2 > successDis)
+                {
+                    MusicManager.Instance.Dequeue();
+                }
+            }
+        }
+    }
+
     public bool Check()
     {
         if (MusicManager.Instance[0].Peek() == null) return false;
@@ -28,15 +47,15 @@ public class DistanceCheck : MonoBehaviour
         var bar1_heartDis = Vector2.Distance(heartPos, barPos1);
         var bar2_heartDis = Vector2.Distance(heartPos, barPos2);
 
-            if (bar1_heartDis < successDis && bar2_heartDis < successDis)
-            {
-                MusicManager.Instance.Dequeue();
-                return true;
-            }
-            else
-            {
-                MusicManager.Instance.Dequeue();
-                return false;
-            }
+        if (bar1_heartDis < successDis && bar2_heartDis < successDis)
+        {
+            MusicManager.Instance.Dequeue();
+            return true;
+        }
+        else
+        {
+            MusicManager.Instance.Dequeue();
+            return false;
+        }
     }
 }
