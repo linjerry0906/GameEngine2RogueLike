@@ -5,12 +5,20 @@ using UnityEngine;
 public class FloorEffectManager : MonoBehaviour 
 {
 	[SerializeField] private float currentLightUp = 0;
+	[SerializeField] private float effectValue = 0.7f;
 	private Material material;
+	private Animator animator;
 
 	void Start () 
 	{
+		animator = GetComponent<Animator>();
 		material = GetComponent<Renderer>().sharedMaterial;
 		StartCoroutine(DebugUpdateColor());
+	}
+
+	private void Update() 
+	{
+		SetEffectValue();
 	}
 	
 	private IEnumerator DebugUpdateColor() 
@@ -21,6 +29,12 @@ public class FloorEffectManager : MonoBehaviour
 			++currentLightUp;
 			currentLightUp %= 2;
 			material.SetFloat("_CurrentLightUp", currentLightUp);
+			animator.Play("Grid_Anime", 0, 0);
 		}
+	}
+
+	private void SetEffectValue()
+	{
+		material.SetFloat("_EffectValue", effectValue);
 	}
 }
