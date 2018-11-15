@@ -24,8 +24,6 @@ namespace Completed
 		private Animator animator;					//Used to store a reference to the Player's animator component.
 		private int food;                           //Used to store player food points total during level.
 
-        public static bool Ispoison;
-        public static int poi_Damage;
 #if UNITY_IOS || UNITY_ANDROID || UNITY_WP8 || UNITY_IPHONE
         private Vector2 touchOrigin = -Vector2.one;	//Used to store location of screen touch origin for mobile controls.
 #endif
@@ -45,8 +43,6 @@ namespace Completed
 			
 			//Call the Start function of the MovingObject base class.
 			base.Start ();
-            Ispoison = false;
-            poi_Damage = 0;
 		}
 		
 		
@@ -129,60 +125,41 @@ namespace Completed
 				//Pass in horizontal and vertical as parameters to specify the direction to move Player in.
 				AttemptMove<Wall> (horizontal, vertical);
 			}
-            if (poi_Damage <= 0) {
-                Ispoison = false;
-                transform.GetComponent<SpriteRenderer>().color = Color.white;
-            }
 		}
-		
-		//AttemptMove overrides the AttemptMove function in the base class MovingObject
-		//AttemptMove takes a generic parameter T which for Player will be of the type Wall, it also takes integers for x and y direction to move in.
-		protected override void AttemptMove <T> (int xDir, int yDir)
-		{
-            if (Ispoison)
+
+        //AttemptMove overrides the AttemptMove function in the base class MovingObject
+        //AttemptMove takes a generic parameter T which for Player will be of the type Wall, it also takes integers for x and y direction to move in.
+        protected override void AttemptMove<T>(int xDir, int yDir)
+        {
+            //Every time player moves, subtract from food points total.
+            food--;
+            //Update food text display to reflect current score.
+            foodText.text = "Food: " + food;
+
+            //Call the AttemptMove method of the base class, passing in the component T (in this case Wall) and x and y direction to move.
+            base.AttemptMove<T>(xDir, yDir);
+
+            //Hit allows us to reference the result of the Linecast done in Move.
+            RaycastHit2D hit;
+
+            //If Move returns true, meaning Player was able to move into an empty space.
+            if (Move(xDir, yDir, out hit))
             {
-                food -= 2;
-                poi_Damage--;
-                foodText.text = "-" + 2 + " Food: " + food;
-                transform.GetComponent<SpriteRenderer>().color = new Color(1, 0, 1);
-            }
-            else
-            {
-                //Every time player moves, subtract from food points total.
-                food--;
-                //Update food text display to reflect current score.
-                foodText.text = "Food: " + food;
+                //Call RandomizeSfx of SoundManager to play the move sound, passing in two audio clips to choose from.
+                SoundManager.instance.RandomizeSfx(moveSound1, moveSound2);
             }
 
-            Debug.Log(Ispoison);
+            //Since the player has moved and lost food points, check if the game has ended.
+            CheckIfGameOver();
 
-
-			//Call the AttemptMove method of the base class, passing in the component T (in this case Wall) and x and y direction to move.
-			base.AttemptMove <T> (xDir, yDir);
-			
-			//Hit allows us to reference the result of the Linecast done in Move.
-			RaycastHit2D hit;
-			
-			//If Move returns true, meaning Player was able to move into an empty space.
-			if (Move (xDir, yDir, out hit)) 
-			{
-				//Call RandomizeSfx of SoundManager to play the move sound, passing in two audio clips to choose from.
-				SoundManager.instance.RandomizeSfx (moveSound1, moveSound2);
-			}
-			
-			//Since the player has moved and lost food points, check if the game has ended.
-			CheckIfGameOver ();
-			
-			//Set the playersTurn boolean of GameManager to false now that players turn is over.
-			GameManager.instance.playersTurn = false;
-		}
+            //Set the playersTurn boolean of GameManager to false now that players turn is over.
+            GameManager.instance.playersTurn = false;
+        }
 				
 		//OnCantMove overrides the abstract function OnCantMove in MovingObject.
 		//It takes a generic parameter T which in the case of Player is a Wall which the player can attack and destroy.
 		protected override void OnCantMove <T> (T component)
 		{
-            //componentに誰が入っているのか？
-            Debug.Log("component : " + component);
             //Set hitWall to equal the component passed in as a parameter.
             Wall hitWall = component as Wall;
 			

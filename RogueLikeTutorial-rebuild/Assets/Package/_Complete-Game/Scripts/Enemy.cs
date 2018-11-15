@@ -7,13 +7,18 @@ namespace Completed
     public class Enemy : MovingObject
     {
         public int playerDamage;                            //The amount of food points to subtract from the player when attacking.
-        public int wallDamage = 1;                  //How much damage a player does to a wall when chopping it.
+        public int wallDamage = 1;                         //How much damage a player does to a wall when chopping it.
+        public int Enemy_HP;//**
         public AudioClip attackSound1;                      //First of two audio clips to play when attacking the player.
         public AudioClip attackSound2;                      //Second of two audio clips to play when attacking the player.
 
         private Animator animator;                          //Variable of type Animator to store a reference to the enemy's Animator component.
-        private Transform target;                           //Transform to attempt to move toward each turn.
+        protected Transform targetPlayer;                           //Transform to attempt to move toward each turn.
+        protected Transform targetWall;//**
         private bool skipMove;                              //Boolean to determine whether or not enemy should skip a turn or move this turn.
+        //  次に行動できるまでのターン数
+        public int skipCount;
+        private int currentCount;
 
         //Start overrides the virtual Start function of the base class.
         protected override void Start()
@@ -26,79 +31,154 @@ namespace Completed
             animator = GetComponent<Animator>();
 
             //Find the Player GameObject using it's tag and store a reference to its transform component.
-            target = GameObject.FindGameObjectWithTag("Player").transform;
+            targetPlayer = GameObject.FindGameObjectWithTag("Player").transform;
+            targetWall = GameObject.FindGameObjectWithTag("Wall").transform;//**
+
+            currentCount = 0;
 
             //Call the start function of our base class MovingObject.
             base.Start();
         }
-        
-        //Override the AttemptMove function of MovingObject to include functionality needed for Enemy to skip turns.
-        //See comments in MovingObject for more on how base AttemptMove function works.
+
         protected override void AttemptMove<T>(int xDir, int yDir)
         {
-            //Check if skipMove is true, if so set it to false and skip this turn.
-            if (skipMove)
+            #region
+            //if (skipMove)
+            //{
+            //    skipMove = false;
+            //    return;
+            //}
+
+            //base.AttemptMove<T>(xDir, yDir);
+
+            //skipMove = true;
+            #endregion
+
+            if (currentCount < skipCount)
             {
-                skipMove = false;
+                currentCount++;
                 return;
             }
 
-            //Call the AttemptMove function from MovingObject.
             base.AttemptMove<T>(xDir, yDir);
 
-            //Now that Enemy has moved, set skipMove to true to skip next move.
-            skipMove = true;
+            currentCount = 0;
         }
-        
-        //MoveEnemy is called by the GameManger each turn to tell each Enemy to try to move towards the player.
-        public void MoveEnemy()
+
+        public void MoveEnemy()//**
         {
-            //Declare variables for X and Y axis move directions, these range from -1 to 1.
-            //These values allow us to choose between the cardinal directions: up, down, left and right.
+            if (this.gameObject.name.Contains("Enemy1"))
+            {
+                StartCoroutine(WallBreakCoroutine());
+            }
+            else
+            {
+                StartCoroutine(NormalCoroutine());
+            }
+        }
+
+        #region//Normal
+        IEnumerator NormalCoroutine()
+        {
+            yield return new WaitForEndOfFrame();
+
             int xDir = 0;
             int yDir = 0;
 
-            //If the difference in positions is approximately zero (Epsilon) do the following:
+            targetWall = null;
+
             //  Player.X == Enemy.X
-            if (Mathf.Abs(target.position.x - transform.position.x) < float.Epsilon)
+            if (Mathf.Abs(targetPlayer.position.x - transform.position.x) < Mathf.Abs(targetPlayer.position.y - transform.position.y))
 
-                //If the y coordinate of the target's (player) position is greater than the y coordinate of this enemy's position set y direction 1 (to move up). If not, set it to -1 (to move down).
-                yDir = target.position.y > transform.position.y ? 1 : -1;
+                yDir = targetPlayer.position.y > transform.position.y ? 1 : -1;
 
-            //If the difference in positions is not approximately zero (Epsilon) do the following:
             //  Player.X != Enemy.X
             else
-                //Check if target x position is greater than enemy's x position, if so set x direction to 1 (move right), if not set to -1 (move left).
-                xDir = target.position.x > transform.position.x ? 1 : -1;
+                xDir = targetPlayer.position.x > transform.position.x ? 1 : -1;
 
-            //Call the AttemptMove function and pass in the generic parameter Player, because Enemy is moving and expecting to potentially encounter a Player
             AttemptMove<Player>(xDir, yDir);
-            Debug.Log(xDir + " : " + yDir);
+        }
+        #endregion
+
+        #region//WallBreak
+        IEnumerator WallBreakCoroutine()
+        {
+            yield return new WaitForEndOfFrame();
+
+            int xDir = 0;
+            int yDir = 0;
+
+            //  マップ上にWallがあるか？
+            if (GameObject.FindGameObjectWithTag("Wall"))
+            {
+                targetWall = GameObject.FindGameObjectWithTag("Wall").transform;
+            }
+            else { targetWall = null; }
+
+            if (targetWall != null)
+            {
+                //  Wallがあるならば壊す
+                //  Wall.X == Enemy.X
+                if (Mathf.Abs(targetWall.position.x - transform.position.x) < Mathf.Abs(targetPlayer.position.y - transform.position.y))
+
+                    yDir = targetWall.position.y > transform.position.y ? 1 : -1;
+
+                //  Wall.X != Enemy.X
+                else
+                    xDir = targetWall.position.x > transform.position.x ? 1 : -1;
+
+                AttemptMove<Wall>(xDir, yDir);
+
+                Debug.Log(targetWall);
+            }
+            //  WallがないならPlayerに攻撃する
+            else
+            {
+                targetWall = null;
+
+                //  Player.X == Enemy.X
+                if (Mathf.Abs(targetPlayer.position.x - transform.position.x) < Mathf.Abs(targetPlayer.position.y - transform.position.y))
+
+                    yDir = targetPlayer.position.y > transform.position.y ? 1 : -1;
+
+                //  Player.X != Enemy.X
+                else
+                    xDir = targetPlayer.position.x > transform.position.x ? 1 : -1;
+
+                AttemptMove<Player>(xDir, yDir);
+            }
+        }
+        #endregion
+
+        protected override void OnCantMove<T>(T component)//**
+        {
+            if (component.tag == "Player")
+            {
+                Player hitPlayer = component as Player;
+
+                hitPlayer.LoseFood(playerDamage);
+
+                animator.SetTrigger("enemyAttack");
+
+                SoundManager.instance.RandomizeSfx(attackSound1, attackSound2);
+            }
+            if (component.tag == "Wall")
+            {
+                //Set hitWall to equal the component passed in as a parameter.
+                Wall hitWall = component as Wall;
+
+                //Call the DamageWall function of the Wall we are hitting.
+                hitWall.DamageWall(wallDamage);
+            }
         }
 
-        //OnCantMove is called if Enemy attempts to move into a space occupied by a Player, it overrides the OnCantMove function of MovingObject 
-        //and takes a generic parameter T which we use to pass in the component we expect to encounter, in this case Player
-        protected override void OnCantMove<T>(T component)
+        public virtual void hitDamage()//**
         {
-            //Componentに誰が入っているのか？
-            Debug.Log("component : " + component);
-            //Playerだった場合
-            //Declare hitPlayer and set it to equal the encountered component.
-            Player hitPlayer = component as Player;
-
-            //Call the LoseFood function of hitPlayer passing it playerDamage, the amount of foodpoints to be subtracted.
-            hitPlayer.LoseFood(playerDamage);
-
-            Player.poi_Damage = 3;
-            Player.Ispoison = true;
-            hitPlayer.GetComponent<SpriteRenderer>().color = new Color(1, 0, 1);
-
-            //Set the attack trigger of animator to trigger Enemy attack animation.
-            animator.SetTrigger("enemyAttack");
-
-            //Call the RandomizeSfx function of SoundManager passing in the two audio clips to choose randomly between.
-            SoundManager.instance.RandomizeSfx(attackSound1, attackSound2);
-
+            Enemy_HP--;
+            if (Enemy_HP >= 0)
+            {
+                Destroy(this);
+            }
         }
     }
 }

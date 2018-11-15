@@ -103,8 +103,6 @@ namespace Completed
                 //If nothing was hit, return and don't execute further code.
                 return;
 
-            Debug.Log(hit);
-
 			//Get a component reference to the component of type T attached to the object that was hit
 			T hitComponent = hit.transform.GetComponent <T> ();
 
