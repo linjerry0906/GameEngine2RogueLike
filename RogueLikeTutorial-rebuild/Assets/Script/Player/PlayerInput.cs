@@ -27,6 +27,8 @@ namespace Completed
         private Animator animator;                  //Used to store a reference to the Player's animator component.
         [SerializeField]
         private Player_Hp_UI hp_ui;
+        [SerializeField]
+        private Animator hit_red;
 
         protected override void Start()
         {
@@ -128,6 +130,7 @@ namespace Completed
             hp -= damage;
 
             hp_ui.Lose(hp);
+            hit_red.SetBool("hit", true);
 
             animator.SetTrigger("playerHit");
 
