@@ -18,13 +18,17 @@ namespace Completed
         public Text hpText;                         //HpのUI
         public AudioClip moveSound1;                //1 of 2 Audio clips to play when player moves.
         public AudioClip moveSound2;                //2 of 2 Audio clips to play when player moves.
-        public AudioClip eatSound1;                 //1 of 2 Audio clips to play when player collects a food object.
-        public AudioClip eatSound2;                 //2 of 2 Audio clips to play when player collects a food object.
-        public AudioClip drinkSound1;               //1 of 2 Audio clips to play when player collects a soda object.
-        public AudioClip drinkSound2;               //2 of 2 Audio clips to play when player collects a soda object.
+        public AudioClip recoverSound1;                 //1 of 2 Audio clips to play when player collects a food object.
+        public AudioClip recoverSound2;                 //2 of 2 Audio clips to play when player collects a food object.
+        public AudioClip attackItemSound1;               //1 of 2 Audio clips to play when player collects a soda object.
+        public AudioClip attackItemSound2;               //2 of 2 Audio clips to play when player collects a soda object.
         public AudioClip gameOverSound;             //Audio clip to play when player dies.
 
         private Animator animator;                  //Used to store a reference to the Player's animator component.
+        [SerializeField]
+        private Player_Hp_UI hp_ui;
+        [SerializeField]
+        private Animator hit_red;
 
         protected override void Start()
         {
@@ -99,10 +103,11 @@ namespace Completed
             else if (other.tag == "Recover")
             {
                 //回復アイテム
-                SoundManager.instance.RandomizeSfx(eatSound1, eatSound2);
+                SoundManager.instance.RandomizeSfx(recoverSound1, recoverSound2);
                 other.gameObject.SetActive(false);
                 if (hp == 3) return;
                 hp++;
+                hp_ui.Recover(hp);
             }
 
             else if (other.tag == "Attack")
@@ -110,7 +115,7 @@ namespace Completed
                 //攻撃力UPアイテム
                 attack = 2;
                 attack_up_count = 3;
-                SoundManager.instance.RandomizeSfx(eatSound1, eatSound2);
+                SoundManager.instance.RandomizeSfx(recoverSound1, recoverSound2);
                 other.gameObject.SetActive(false);
             }
         }
@@ -123,6 +128,9 @@ namespace Completed
         public void LoseHp(int damage)
         {
             hp -= damage;
+
+            hp_ui.Lose(hp);
+            hit_red.SetBool("hit", true);
 
             animator.SetTrigger("playerHit");
 

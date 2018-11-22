@@ -13,24 +13,25 @@ public class FloorEffectManager : MonoBehaviour
 	{
 		animator = GetComponent<Animator>();
 		material = GetComponent<Renderer>().sharedMaterial;
-		StartCoroutine(DebugUpdateColor());
+	}
+
+	public void SetSpeed(float onePlayPerSecond)
+	{
+		animator = GetComponent<Animator>();
+		animator.SetFloat("speed", 1.0f / onePlayPerSecond);
 	}
 
 	private void Update() 
 	{
 		SetEffectValue();
 	}
-	
-	private IEnumerator DebugUpdateColor() 
+
+	public void ReverseColor()
 	{
-		while(true)
-		{
-			yield return new WaitForSeconds(1.0f);
-			++currentLightUp;
-			currentLightUp %= 2;
-			material.SetFloat("_CurrentLightUp", currentLightUp);
-			animator.Play("Grid_Anime", 0, 0);
-		}
+		++currentLightUp;
+		currentLightUp %= 2;
+		material.SetFloat("_CurrentLightUp", currentLightUp);
+		animator.Play("Grid_Anime", 0, 0);
 	}
 
 	private void SetEffectValue()

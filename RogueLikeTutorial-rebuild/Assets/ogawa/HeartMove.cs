@@ -6,6 +6,7 @@ using UnityEngine;
 public class HeartMove : MonoBehaviour
 {
     [SerializeField] float speed;
+    [SerializeField] FloorEffectManager floorEffectManager;
     HeartAnime anim;
     bool isStart;
     // Use this for initialization
@@ -13,6 +14,7 @@ public class HeartMove : MonoBehaviour
     {
         anim = gameObject.AddComponent<HeartAnime>();
         anim.SetSpeed(speed);
+        floorEffectManager.SetSpeed(speed);
     }
 
     public IEnumerator Move(float wait)
@@ -21,6 +23,7 @@ public class HeartMove : MonoBehaviour
         {
             yield return new WaitForSeconds(wait);
             anim.Play();
+            floorEffectManager.ReverseColor();
         }
     }
 }

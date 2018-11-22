@@ -19,6 +19,6 @@ public class HeartAnime : MonoBehaviour
 	public void SetSpeed(float onePlayPerSecond)
 	{
 		animator = GetComponent<Animator>();
-		animator.speed = 1.0f / onePlayPerSecond;
+		animator.SetFloat("speed", onePlayPerSecond);
 	}
 }
