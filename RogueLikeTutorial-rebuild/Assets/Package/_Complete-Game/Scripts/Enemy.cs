@@ -3,9 +3,18 @@ using System.Collections;
 
 namespace Completed
 {
+    enum EnemyMove
+    {
+        Normal,
+        WallBreak,
+        LongDistance,
+    };
+
     //Enemy inherits from MovingObject, our base class for objects that can move, Player also inherits from this.
     public class Enemy : MovingObject
     {
+        [SerializeField] EnemyMove enemyMove;               //Enemyの行動
+
         public int playerDamage;                            //The amount of food points to subtract from the player when attacking.
         public int wallDamage = 1;                         //How much damage a player does to a wall when chopping it.
         public int Enemy_HP;//**
@@ -16,7 +25,7 @@ namespace Completed
         protected Transform targetPlayer;                           //Transform to attempt to move toward each turn.
         protected Transform targetWall;//**
         private GameObject Player_Object;
-        private bool skipMove;                              //Boolean to determine whether or not enemy should skip a turn or move this turn.
+
         //  次に行動できるまでのターン数//**
         public int skipCount;
         private int currentCount;
@@ -47,36 +56,22 @@ namespace Completed
 
         protected override void AttemptMove<T>(int xDir, int yDir)
         {
-            #region
-            //if (skipMove)
-            //{
-            //    skipMove = false;
-            //    return;
-            //}
-
-            //base.AttemptMove<T>(xDir, yDir);
-
-            //skipMove = true;
-            #endregion
-
             if (currentCount < skipCount)
             {
                 currentCount++;
                 return;
             }
-
             base.AttemptMove<T>(xDir, yDir);
-
             currentCount = 0;
         }
 
         public void MoveEnemy()//**
         {
-            if (this.gameObject.name.Contains("Enemy1"))
+            if (enemyMove == EnemyMove.LongDistance)
             {
                 StartCoroutine(LongDistanceCoroutine());
             }
-            else if(this.gameObject.name.Contains("Enemy2"))
+            else if (enemyMove == EnemyMove.Normal)
             {
                 StartCoroutine(NormalCoroutine());
             }
@@ -96,6 +91,7 @@ namespace Completed
 
             targetWall = null;
 
+            #region// Move
             //  Player.X == Enemy.X
             if (Mathf.Abs(targetPlayer.position.x - transform.position.x) < Mathf.Abs(targetPlayer.position.y - transform.position.y))
 
@@ -106,6 +102,8 @@ namespace Completed
                 xDir = targetPlayer.position.x > transform.position.x ? 1 : -1;
 
             AttemptMove<Player>(xDir, yDir);
+
+            #endregion
         }
         #endregion
 
@@ -124,11 +122,12 @@ namespace Completed
             }
             else { targetWall = null; }
 
+            #region// Move-Wall
             if (targetWall != null)
             {
                 //  Wallがあるならば壊す
                 //  Wall.X == Enemy.X
-                if (Mathf.Abs(targetWall.position.x - transform.position.x) < Mathf.Abs(targetPlayer.position.y - transform.position.y))
+                if (Mathf.Abs(targetWall.position.x - transform.position.x) < Mathf.Abs(targetWall.position.y - transform.position.y))
 
                     yDir = targetWall.position.y > transform.position.y ? 1 : -1;
 
@@ -138,8 +137,10 @@ namespace Completed
 
                 AttemptMove<Destroyable>(xDir, yDir);
 
-                Debug.Log(targetWall);
             }
+            #endregion
+
+            #region// Move-Player
             //  WallがないならPlayerに攻撃する
             else
             {
@@ -156,6 +157,7 @@ namespace Completed
 
                 AttemptMove<Player>(xDir, yDir);
             }
+            #endregion
         }
         #endregion
 
@@ -168,32 +170,31 @@ namespace Completed
             int yDir = 0;
 
             targetWall = null;
-            
+
+            #region// Move
             if (Mathf.Abs(targetPlayer.position.x - transform.position.x) < Mathf.Abs(targetPlayer.position.y - transform.position.y))
             {
+                //  Stay-Attack
                 if (targetPlayer.position.x == transform.position.x || targetPlayer.position.y == transform.position.y)
-                {
-                    longAttack++;
-                    yDir = 0;
-                }
+                { longAttack++; yDir = 0;
+                    this.gameObject.GetComponent<SpriteRenderer>().color = Color.yellow; }
                 else
-                {
-                    yDir = targetPlayer.position.y > transform.position.y ? 1 : -1;
+                { yDir = targetPlayer.position.y > transform.position.y ? 1 : -1;longAttack = 0;
+                    this.gameObject.GetComponent<SpriteRenderer>().color = Color.white;
                 }
             }
-            
             else
             {
+                //  Stay-Attack
                 if (targetPlayer.position.x == transform.position.x || targetPlayer.position.y == transform.position.y)
-                {
-                    longAttack++;
-                    xDir = 0;
-                }
+                { longAttack++; xDir = 0;
+                    this.gameObject.GetComponent<SpriteRenderer>().color = Color.yellow; }
                 else
-                {
-                    xDir = targetPlayer.position.x > transform.position.x ? 1 : -1;
+                { xDir = targetPlayer.position.x > transform.position.x ? 1 : -1;longAttack = 0;
+                    this.gameObject.GetComponent<SpriteRenderer>().color = Color.white;
                 }
             }
+
             if (longAttack >= 2)
             {
                 Player_Object.GetComponent<Player>().LoseFood(playerDamage);
@@ -202,14 +203,18 @@ namespace Completed
                 SoundManager.instance.RandomizeSfx(attackSound1, attackSound2);
 
                 longAttack = 0;
+                this.gameObject.GetComponent<SpriteRenderer>().color = Color.white;
             }
 
             AttemptMove<Player>(xDir, yDir);
+
+            #endregion
         }
         #endregion
 
         protected override void OnCantMove<T>(T component)//**
         {
+            #region// component==Player
             if (component.tag == "Player")
             {
                 Player hitPlayer = component as Player;
@@ -220,6 +225,9 @@ namespace Completed
 
                 SoundManager.instance.RandomizeSfx(attackSound1, attackSound2);
             }
+            #endregion
+
+            #region// component==Wall
             if (component.tag == "Wall")
             {
                 //Set hitWall to equal the component passed in as a parameter.
@@ -227,10 +235,24 @@ namespace Completed
 
                 //Call the DamageWall function of the Wall we are hitting.
                 hitWall.Damaged(wallDamage);
+
+                animator.SetTrigger("enemyAttack");
+
+                SoundManager.instance.RandomizeSfx(attackSound1, attackSound2);
             }
+            #endregion
+
+            StartCoroutine(ColorChangeCoroutine());
         }
 
-        public virtual void hitDamage()//**
+        IEnumerator ColorChangeCoroutine()
+        {
+            this.gameObject.GetComponent<SpriteRenderer>().color = Color.yellow;
+            yield return new WaitForSeconds(1);
+            this.gameObject.GetComponent<SpriteRenderer>().color = Color.white;
+        }
+
+        public virtual void HitDamage()//**
         {
             Enemy_HP--;
             if (Enemy_HP >= 0)
