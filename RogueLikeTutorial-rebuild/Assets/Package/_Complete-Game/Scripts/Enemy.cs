@@ -15,10 +15,14 @@ namespace Completed
         private Animator animator;                          //Variable of type Animator to store a reference to the enemy's Animator component.
         protected Transform targetPlayer;                           //Transform to attempt to move toward each turn.
         protected Transform targetWall;//**
+        private GameObject Player_Object;
         private bool skipMove;                              //Boolean to determine whether or not enemy should skip a turn or move this turn.
-        //  次に行動できるまでのターン数
+        //  次に行動できるまでのターン数//**
         public int skipCount;
         private int currentCount;
+
+        //  遠距離攻撃のリミットターン数//**
+        private int longAttack;
 
         //Start overrides the virtual Start function of the base class.
         protected override void Start()
@@ -32,10 +36,11 @@ namespace Completed
 
             //Find the Player GameObject using it's tag and store a reference to its transform component.
             targetPlayer = GameObject.FindGameObjectWithTag("Player").transform;
+            Player_Object = GameObject.FindGameObjectWithTag("Player");
             targetWall = GameObject.FindGameObjectWithTag("Wall").transform;//**
 
             currentCount = 0;
-
+            longAttack = 0;
             //Call the start function of our base class MovingObject.
             base.Start();
         }
@@ -69,15 +74,19 @@ namespace Completed
         {
             if (this.gameObject.name.Contains("Enemy1"))
             {
-                StartCoroutine(WallBreakCoroutine());
+                StartCoroutine(LongDistanceCoroutine());
             }
-            else
+            else if(this.gameObject.name.Contains("Enemy2"))
             {
                 StartCoroutine(NormalCoroutine());
             }
+            else
+            {
+                StartCoroutine(WallBreakCoroutine());
+            }
         }
 
-        #region//Normal
+        #region//   Normal
         IEnumerator NormalCoroutine()
         {
             yield return new WaitForEndOfFrame();
@@ -100,7 +109,7 @@ namespace Completed
         }
         #endregion
 
-        #region//WallBreak
+        #region//   WallBreak
         IEnumerator WallBreakCoroutine()
         {
             yield return new WaitForEndOfFrame();
@@ -147,6 +156,55 @@ namespace Completed
 
                 AttemptMove<Player>(xDir, yDir);
             }
+        }
+        #endregion
+
+        #region//   LondDistance
+        IEnumerator LongDistanceCoroutine()
+        {
+            yield return new WaitForEndOfFrame();
+
+            int xDir = 0;
+            int yDir = 0;
+
+            targetWall = null;
+            
+            if (Mathf.Abs(targetPlayer.position.x - transform.position.x) < Mathf.Abs(targetPlayer.position.y - transform.position.y))
+            {
+                if (targetPlayer.position.x == transform.position.x || targetPlayer.position.y == transform.position.y)
+                {
+                    longAttack++;
+                    yDir = 0;
+                }
+                else
+                {
+                    yDir = targetPlayer.position.y > transform.position.y ? 1 : -1;
+                }
+            }
+            
+            else
+            {
+                if (targetPlayer.position.x == transform.position.x || targetPlayer.position.y == transform.position.y)
+                {
+                    longAttack++;
+                    xDir = 0;
+                }
+                else
+                {
+                    xDir = targetPlayer.position.x > transform.position.x ? 1 : -1;
+                }
+            }
+            if (longAttack >= 2)
+            {
+                Player_Object.GetComponent<Player>().LoseFood(playerDamage);
+                animator.SetTrigger("enemyAttack");
+
+                SoundManager.instance.RandomizeSfx(attackSound1, attackSound2);
+
+                longAttack = 0;
+            }
+
+            AttemptMove<Player>(xDir, yDir);
         }
         #endregion
 
