@@ -5,8 +5,10 @@
 		_MainTex ("Texture", 2D) = "white" {}
 		_GridTex ("GridTex", 2D) = "white" {}
 		_EffectValue ("EffectValue", Range(0, 1)) = 1
+		_GridAlpha ("GridAlpha", Range(0, 1)) = 1
 		_Color1 ("Color1", Color) = (0, 0, 0, 0)
 		_Color2 ("Color2", Color) = (0, 0, 0, 0)
+		_Emission ("Emission", Float) = 1
 
 		[Space(20)]
 		_CurrentLightUp("CurrentLightUp", Float) = 0
@@ -60,6 +62,8 @@
 			fixed4 _Color2;
 			fixed _EffectValue;
 			fixed _CurrentLightUp;
+			fixed _GridAlpha;
+			fixed _Emission;
 
 			fixed4 frag (v2f i) : SV_Target
 			{
@@ -76,8 +80,8 @@
 				fixed4 texOrign = tex2D(_MainTex, i.uv);
 				fixed4 grid = tex2D(_GridTex, i.uv);
 				fixed4 finalGrid = texOrign * colors[index];
-				finalGrid = lerp(finalGrid, grid * colors[index], grid.a * (1 - lerpVal));
-				fixed4 col = lerp(texOrign, finalGrid, _EffectValue);
+				finalGrid = lerp(finalGrid, grid * colors[index], grid.a * (1 - lerpVal) * _GridAlpha);
+				fixed4 col = lerp(texOrign, finalGrid, _EffectValue) * _Emission;
 				return col;
 			}
 			ENDCG
