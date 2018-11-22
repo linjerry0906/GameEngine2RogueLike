@@ -86,6 +86,8 @@ namespace Completed
         {
             Destroyable hitWall = component as Destroyable;
 
+            hp_ui.Lose(2);
+            hit_red.SetBool("hit",true);
             CheckAttack();//プレイヤーの攻撃力Check
             hitWall.Damaged(attack);//攻撃
 
