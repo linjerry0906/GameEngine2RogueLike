@@ -8,6 +8,7 @@
 		_EmissionMap ("EmissionMap", 2D) = "white" {}
 		_LastFrame ("LastFrame", 2D) = "white" {}
 		_OldFrame ("OldFrame", 2D) = "white" {}
+		_BlendOffSet ("BlendOffSet", Vector) = (0, 0, 0, 0)
 		
 		_SampleCount ("SampleCount", Int) = 3
 		_Brightness ("Brightness", Float) = 1.0
@@ -54,8 +55,9 @@
 			float _resoX;
 			float _resoY;
 			float _SampleCount;
-			float _BlendRate;
+			float _BlendRateLast;
 			float _BlendRateOld;
+			float4 _BlendOffSet;
 
 			fixed4 frag (v2f i) : SV_Target
 			{
@@ -67,15 +69,21 @@
 					for(float x = -_SampleCount; x <= _SampleCount; ++x)
 					{
 						fixed effective = clamp((_SampleCount + 1) - (abs(x) + abs(y)), 0, _SampleCount + 1);
-						fixed2 offset = fixed2(x * size.x, y * size.y);
-						light += tex2D(_Light, i.uv + offset) * effective * effective;
+						fixed2 offset = i.uv + fixed2(x * size.x, y * size.y);
+						fixed4 color = tex2D(_Light, offset) * effective * effective;
+						color = offset.x > 1 ? fixed4(0, 0, 0, 0) : color;
+						color = offset.x < 0 ? fixed4(0, 0, 0, 0) : color;
+						color = offset.y > 1 ? fixed4(0, 0, 0, 0) : color;
+						color = offset.y < 0 ? fixed4(0, 0, 0, 0) : color;
+						light += color;
 					}
 				}
 				light /= (_SampleCount * 2 + 1) * (_SampleCount * 2 + 1);
 				light *= _Brightness;
-				fixed4 lastFrame = tex2D(_LastFrame, i.uv);
-				fixed4 oldFrame = tex2D(_OldFrame, i.uv);
-				light += lastFrame * _BlendRate + oldFrame * _BlendRateOld;
+				float2 blendOffset = float2(_BlendOffSet.x * size.x, _BlendOffSet.y * size.y);
+				fixed4 lastFrame = tex2D(_LastFrame, i.uv + blendOffset);
+				fixed4 oldFrame = tex2D(_OldFrame, i.uv + blendOffset);
+				light += lastFrame * _BlendRateLast + oldFrame * _BlendRateOld;
 				return saturate(light);
 			}
 			ENDCG
