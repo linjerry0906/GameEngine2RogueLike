@@ -27,18 +27,18 @@ namespace Completed
 		}
 		
 		[SerializeField] private int mapSize = 100;
+		public float lightPercent = 0.01f;
 		public int columns = 8; 										//Number of columns in our game board.
 		public int rows = 8;											//Number of rows in our game board.
 		public Count wallCount = new Count (5, 9);						//Lower and upper limit for our random number of walls per level.
 		public Count foodCount = new Count (1, 5);						//Lower and upper limit for our random number of food items per level.
-		public Count lightCount = new Count (10, 20);
 		public GameObject exit;											//Prefab to spawn for exit.
 		public GameObject[] floorTiles;									//Array of floor prefabs.
 		public GameObject[] wallTiles;									//Array of wall prefabs.
 		public GameObject[] foodTiles;									//Array of food prefabs.
 		public GameObject[] enemyTiles;									//Array of enemy prefabs.
 		public GameObject[] outerWallTiles;								//Array of outer tile prefabs.2
-		public GameObject[] lightTiles;
+		public GameObject lightTile;
 		
 		private Transform boardHolder;									//A variable to store a reference to the transform of our Board object.
 		private List <Vector3> gridPositions = new List <Vector3> ();	//A list of possible locations to place tiles.
@@ -128,7 +128,11 @@ namespace Completed
 					
 					//Check if we current position is at board edge, if so choose a random outer wall prefab from our array of outer wall tiles.
 					if(chip[y, x] == (int)BlockDef.Wall)
+					{
 						toInstantiate = outerWallTiles [Random.Range (0, outerWallTiles.Length)];
+						if(Random.value < lightPercent)
+							toInstantiate = lightTile;
+					}
 					
 					//Instantiate the GameObject instance using the prefab chosen for toInstantiate at the Vector3 corresponding to current grid position in loop, cast it to GameObject.
 					GameObject instance =
@@ -210,8 +214,6 @@ namespace Completed
 			
 			//Reset our list of gridpositions.
 			InitialiseList (chip);
-
-			LayoutObjectAtRandom (lightTiles, lightCount.minimum, lightCount.maximum);
 			
 			//Instantiate a random number of wall tiles based on minimum and maximum, at randomized positions.
 			LayoutObjectAtRandom (wallTiles, wallCount.minimum, wallCount.maximum);
