@@ -10,6 +10,6 @@ public class ItemOnTake : MonoBehaviour
 	{
 		particle.transform.parent = taker;
 		particle.transform.localPosition = Vector3.zero;
-		particle.Play();
+		particle.Play(true);
 	}
 }
