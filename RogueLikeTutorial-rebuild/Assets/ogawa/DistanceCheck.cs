@@ -31,7 +31,7 @@ public class DistanceCheck : MonoBehaviour
             {
                 var bar1_bar2 = Vector2.Distance(bar1.transform.position, bar2.transform.position);
 
-                if (bar1_bar2 > successDis)
+                if (bar1_bar2 > outDis)
                 {
                     MusicManager.Instance.Dequeue();
                 }

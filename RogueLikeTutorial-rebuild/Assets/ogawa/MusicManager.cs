@@ -63,7 +63,6 @@ public class MusicManager : MonoBehaviour
     {
         while (true)
         {
-                Debug.Log(Time.time);
             for (int i = 0; i < generateObj.Length; i++)
             {
                 if (!SoundManager.instance.IsBgmPlaying) SoundManager.instance.BgmPlay(clip);
