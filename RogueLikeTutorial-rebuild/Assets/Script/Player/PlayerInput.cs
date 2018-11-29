@@ -19,9 +19,9 @@ namespace Completed
         public AudioClip moveSound1;                //1 of 2 Audio clips to play when player moves.
         public AudioClip moveSound2;                //2 of 2 Audio clips to play when player moves.
         public AudioClip recoverSound1;                 //1 of 2 Audio clips to play when player collects a food object.
-        public AudioClip recoverSound2;                 //2 of 2 Audio clips to play when player collects a food object.
+        public AudioClip recoverSound2;                 //1 of 2 Audio clips to play when player collects a food object.
         public AudioClip attackItemSound1;               //1 of 2 Audio clips to play when player collects a soda object.
-        public AudioClip attackItemSound2;               //2 of 2 Audio clips to play when player collects a soda object.
+        public AudioClip attackItemSound2;               //1 of 2 Audio clips to play when player collects a soda object.
         public AudioClip gameOverSound;             //Audio clip to play when player dies.
 
         private Animator animator;                  //Used to store a reference to the Player's animator component.
