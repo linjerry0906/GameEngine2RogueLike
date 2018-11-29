@@ -9,6 +9,7 @@ public class HeartMove : MonoBehaviour
     [SerializeField] FloorEffectManager floorEffectManager;
     HeartAnime anim;
     bool isStart;
+
     // Use this for initialization
     void Start()
     {
@@ -21,9 +22,9 @@ public class HeartMove : MonoBehaviour
     {
         while (true)
         {
-            yield return new WaitForSeconds(wait);
             anim.Play();
             floorEffectManager.ReverseColor();
+            yield return new WaitForSeconds(wait);
         }
     }
 }

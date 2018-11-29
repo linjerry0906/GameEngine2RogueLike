@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.Linq;
+using Completed;
 
 //小川
 public class MusicManager : MonoBehaviour
@@ -16,6 +17,7 @@ public class MusicManager : MonoBehaviour
     [SerializeField] float interval;
     [SerializeField] HeartMove heartMove;
     [SerializeField] DistanceCheck distanceCheck;
+    [SerializeField] AudioClip clip;
 
     public static MusicManager Instance { get { return instance; } }
     public float BarSpeed { get { return barSpeed; } }
@@ -29,6 +31,7 @@ public class MusicManager : MonoBehaviour
         }
     }
     public bool Check { get { return distanceCheck.Check(); } }
+    bool isMoving;
 
     void Awake()
     {
@@ -43,15 +46,16 @@ public class MusicManager : MonoBehaviour
     {
         barBox1 = new Queue<GameObject>();
         barBox2 = new Queue<GameObject>();
-        StartCoroutine(Generate());
-        StartCoroutine(heartMove.Move(interval));
+        isMoving = false;
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.A))
+        if (!isMoving)
         {
-            StopCoroutine(Generate());
+            StartCoroutine(Generate());
+            StartCoroutine(heartMove.Move(interval));
+            isMoving = true;
         }
     }
 
@@ -59,8 +63,11 @@ public class MusicManager : MonoBehaviour
     {
         while (true)
         {
+                Debug.Log(Time.time);
             for (int i = 0; i < generateObj.Length; i++)
             {
+                if (!SoundManager.instance.IsBgmPlaying) SoundManager.instance.BgmPlay(clip);
+
                 var obj = Instantiate(generateObj[i].transform.GetChild(0).gameObject, generateObj[i].transform.position,
                    generateObj[i].transform.GetChild(0).rotation);
                 obj.SetActive(true);
