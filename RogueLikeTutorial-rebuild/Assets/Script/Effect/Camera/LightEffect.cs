@@ -12,6 +12,8 @@ public class LightEffect : MonoBehaviour
 	private RenderTexture emissionMap;
 	private List<RenderTexture> buffers;
 	private int currentBuffer;
+	private Vector3 shaderOffset;
+	private Vector3 lastOffset;
 
 	private void Awake() 
 	{
@@ -32,6 +34,8 @@ public class LightEffect : MonoBehaviour
 
 		lightMapMaterial.SetTexture ("_EmissionMap", emissionMap);
 		lightMapMaterial.SetTexture ("_Light", lightMap);
+		shaderOffset = Vector3.zero;
+		lastOffset = Vector3.zero;
 		SetBlendOffset(Vector3.zero);
 		StartCoroutine(UpdateFrameBuffer(updateSpeed));
 	}
@@ -41,7 +45,6 @@ public class LightEffect : MonoBehaviour
 		RenderTexture rt = RenderTexture.GetTemporary (Screen.width, Screen.height);
 		rt.wrapMode = TextureWrapMode.Clamp;
 		rt.filterMode = FilterMode.Point;
-
 		return rt;
 	}
 
@@ -51,15 +54,16 @@ public class LightEffect : MonoBehaviour
 		{
 			yield return new WaitForSeconds(second);
 			
-			currentBuffer++;
-			currentBuffer %= buffers.Count;
+			SwitchBuffer();
 		}
 	}
 
-	public void SwitchBuffer()
+	private void SwitchBuffer()
 	{
 		currentBuffer++;
 		currentBuffer %= buffers.Count;
+		shaderOffset = Vector3.zero;
+		lightMapMaterial.SetVector("_BlendOffSet", new Vector4(shaderOffset.x, shaderOffset.y, shaderOffset.z, 0));
 	}
 	
 	void OnRenderImage(RenderTexture src,RenderTexture dest)
@@ -77,6 +81,9 @@ public class LightEffect : MonoBehaviour
 
 	public void SetBlendOffset(Vector3 offset)
 	{
-		lightMapMaterial.SetVector("_BlendOffSet", new Vector4(offset.x, offset.y, offset.z, 0));
+		if(offset == Vector3.zero) lastOffset = Vector3.zero;
+		shaderOffset += offset - lastOffset;
+		lastOffset = offset;
+		lightMapMaterial.SetVector("_BlendOffSet", new Vector4(shaderOffset.x, shaderOffset.y, shaderOffset.z, 0));
 	}
 }

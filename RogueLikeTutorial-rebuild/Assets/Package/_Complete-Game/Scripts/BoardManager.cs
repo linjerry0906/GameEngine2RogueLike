@@ -200,7 +200,8 @@ namespace Completed
 
 		private IEnumerator Setup(int level)
 		{
-			MapGenerator mapGenerator = new MapGenerator(mapSize);
+			int difficulty = (int)Mathf.Log(level, 2f);
+			MapGenerator mapGenerator = new MapGenerator(mapSize + difficulty);
 			while(!mapGenerator.IsEnd())
 			{
 				mapGenerator.Update();
@@ -222,7 +223,7 @@ namespace Completed
 			LayoutObjectAtRandom (foodTiles, foodCount.minimum, foodCount.maximum);
 			
 			//Determine number of enemies based on current level number, based on a logarithmic progression
-			int enemyCount = (int)(Mathf.Log(level, 2f) + mapSize / 10);
+			int enemyCount = (int)(difficulty + mapSize / 5);
 			
 			//Instantiate a random number of enemies based on minimum and maximum, at randomized positions.
 			LayoutObjectAtRandom (enemyTiles, enemyCount, enemyCount);

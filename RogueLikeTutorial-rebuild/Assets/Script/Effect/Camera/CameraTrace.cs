@@ -8,6 +8,7 @@ public class CameraTrace : MonoBehaviour
 	[SerializeField] private Vector3 offset = new Vector3(0, 0, -10.0f);
 	private Vector3 movOffset;
 	private Vector3 lastFrame;
+	private Vector3 destination;
 
 	private void Start() 
 	{
@@ -26,9 +27,30 @@ public class CameraTrace : MonoBehaviour
 	void Update () 
 	{
 		Vector3 pos = player.transform.position;
-		transform.position = pos + offset;
+		Vector3 dest = pos + offset;
+		if(dest != destination)
+		{
+			StopAllCoroutines();
+			StartCoroutine(Move(dest));
+		}
 
 		UpdateMoveOffset();
+	}
+
+	private IEnumerator Move(Vector3 dest)
+	{
+		float rate = 0;
+		Vector3 startPos = transform.position;
+		destination = dest;
+		while(rate < 0.5f)
+		{
+			rate += Time.deltaTime;
+			rate = rate >= 0.5f ? 0.5f: rate;
+			float useRate = (1 - rate * 2);
+			useRate *= useRate;
+			transform.position = Vector3.Lerp(startPos, dest, 1 - useRate);
+			yield return null;
+		}
 	}
 
 	private void UpdateMoveOffset()
@@ -49,6 +71,5 @@ public class CameraTrace : MonoBehaviour
 		}
 
 		GetComponent<LightEffect>().SetBlendOffset(movOffset);
-		GetComponent<LightEffect>().SwitchBuffer();
 	}
 }

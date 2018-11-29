@@ -71,19 +71,19 @@
 						fixed effective = clamp((_SampleCount + 1) - (abs(x) + abs(y)), 0, _SampleCount + 1);
 						fixed2 offset = i.uv + fixed2(x * size.x, y * size.y);
 						fixed4 color = tex2D(_Light, offset) * effective * effective;
-						color = offset.x > 1 ? fixed4(0, 0, 0, 0) : color;
-						color = offset.x < 0 ? fixed4(0, 0, 0, 0) : color;
-						color = offset.y > 1 ? fixed4(0, 0, 0, 0) : color;
-						color = offset.y < 0 ? fixed4(0, 0, 0, 0) : color;
+						//color = offset.x > 1 ? fixed4(0, 0, 0, 0) : color;
+						//color = offset.x < 0 ? fixed4(0, 0, 0, 0) : color;
+						//color = offset.y > 1 ? fixed4(0, 0, 0, 0) : color;
+						//color = offset.y < 0 ? fixed4(0, 0, 0, 0) : color;
 						light += color;
 					}
 				}
 				light /= (_SampleCount * 2 + 1) * (_SampleCount * 2 + 1);
-				light *= _Brightness;
 				float2 blendOffset = float2(_BlendOffSet.x * size.x, _BlendOffSet.y * size.y);
 				fixed4 lastFrame = tex2D(_LastFrame, i.uv + blendOffset);
 				fixed4 oldFrame = tex2D(_OldFrame, i.uv + blendOffset);
 				light += lastFrame * _BlendRateLast + oldFrame * _BlendRateOld;
+				light *= _Brightness;
 				return saturate(light);
 			}
 			ENDCG
