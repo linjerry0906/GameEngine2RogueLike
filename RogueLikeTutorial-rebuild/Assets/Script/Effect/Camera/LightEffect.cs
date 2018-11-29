@@ -7,6 +7,7 @@ public class LightEffect : MonoBehaviour
 	[SerializeField] private Camera lightMapCamera;
 	[SerializeField] private Camera emissionCamera;
 	[SerializeField] private Material lightMapMaterial;
+	[SerializeField] private Material blendMaterial;
 	[SerializeField] private float updateSpeed = 0.2f;
 	private RenderTexture lightMap;
 	private RenderTexture emissionMap;
@@ -31,9 +32,9 @@ public class LightEffect : MonoBehaviour
 		lightMapMaterial.SetFloat("_resoY", (float)Screen.currentResolution.height);
 
 		emissionCamera.targetTexture = emissionMap;
-
-		lightMapMaterial.SetTexture ("_EmissionMap", emissionMap);
 		lightMapMaterial.SetTexture ("_Light", lightMap);
+		blendMaterial.SetTexture ("_EmissionMap", emissionMap);
+		blendMaterial.SetTexture ("_Light", lightMap);
 		shaderOffset = Vector3.zero;
 		lastOffset = Vector3.zero;
 		SetBlendOffset(Vector3.zero);
@@ -73,10 +74,10 @@ public class LightEffect : MonoBehaviour
 
 		lightMapMaterial.SetTexture ("_LastFrame", buffers[lastFrameIndex]);
 		lightMapMaterial.SetTexture ("_OldFrame", buffers[oldestFrameIndex]);
-        Graphics.Blit (src, buffers[currentBuffer], lightMapMaterial, 0);		//Current frame light map
+        Graphics.Blit (src, buffers[currentBuffer], lightMapMaterial);		//Current frame light map
 
-		lightMapMaterial.SetTexture ("_LightMap", buffers[currentBuffer]);
-		Graphics.Blit (src, dest, lightMapMaterial, 1);
+		blendMaterial.SetTexture ("_LightMap", buffers[currentBuffer]);
+		Graphics.Blit (src, dest, blendMaterial);
     }
 
 	public void SetBlendOffset(Vector3 offset)
