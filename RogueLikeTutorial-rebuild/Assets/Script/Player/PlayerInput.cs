@@ -110,6 +110,7 @@ namespace Completed
                 if (hp == 3) return;
                 hp++;
                 hp_ui.Recover(hp);
+                other.GetComponent<ItemOnTake>().OnTake(transform);
             }
 
             else if (other.tag == "Attack")
