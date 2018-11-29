@@ -15,13 +15,10 @@ namespace Completed
         public int attack = 1;                      //攻撃力
         public int attack_up_count = 0;             //攻撃力上昇カウント(アイテム)
         public int hp = 3;                          //HP
-        public Text hpText;                         //HpのUI
         public AudioClip moveSound1;                //1 of 2 Audio clips to play when player moves.
-        public AudioClip moveSound2;                //2 of 2 Audio clips to play when player moves.
-        public AudioClip recoverSound1;                 //1 of 2 Audio clips to play when player collects a food object.
-        public AudioClip recoverSound2;                 //1 of 2 Audio clips to play when player collects a food object.
-        public AudioClip attackItemSound1;               //1 of 2 Audio clips to play when player collects a soda object.
-        public AudioClip attackItemSound2;               //1 of 2 Audio clips to play when player collects a soda object.
+        public AudioClip recoverSound1;             //1 of 2 Audio clips to play when player collects a recover object.
+        public AudioClip attackItemSound1;          //1 of 2 Audio clips to play when player collects a attack object.
+        public AudioClip loseHpSound1;              //1 of 2 Audio clips to play when player lose hp.
         public AudioClip gameOverSound;             //Audio clip to play when player dies.
 
         private Animator animator;                  //Used to store a reference to the Player's animator component.
@@ -31,6 +28,8 @@ namespace Completed
         private Animator hit_red;
         [SerializeField]
         private DistanceCheck check;
+        [SerializeField]
+        private ParticleSystem attack_particle;
 
         protected override void Start()
         {
@@ -78,7 +77,7 @@ namespace Completed
 
             if (Move(xDir, yDir, out hit))
             {
-                SoundManager.instance.RandomizeSfx(moveSound1, moveSound2);
+                SoundManager.instance.efxSource.PlayOneShot(moveSound1);
             }
 
             GameManager.instance.playersTurn = false;
@@ -90,7 +89,8 @@ namespace Completed
             
             CheckAttack();//プレイヤーの攻撃力Check
             hitWall.Damaged(attack);//攻撃
-
+            attack_particle.transform.position = transform.position;
+            attack_particle.Play();
             animator.SetTrigger("playerChop");
         }
 
@@ -105,7 +105,7 @@ namespace Completed
             else if (other.tag == "Recover")
             {
                 //回復アイテム
-                SoundManager.instance.RandomizeSfx(recoverSound1, recoverSound2);
+                SoundManager.instance.efxSource.PlayOneShot(recoverSound1);
                 other.gameObject.SetActive(false);
                 if (hp == 3) return;
                 hp++;
@@ -118,8 +118,9 @@ namespace Completed
                 //攻撃力UPアイテム
                 attack = 2;
                 attack_up_count = 3;
-                SoundManager.instance.RandomizeSfx(recoverSound1, recoverSound2);
+                SoundManager.instance.efxSource.PlayOneShot(attackItemSound1);
                 other.gameObject.SetActive(false);
+                other.GetComponent<ItemOnTake>().OnTake(transform);
             }
         }
 
@@ -134,9 +135,9 @@ namespace Completed
 
             hp_ui.Lose(hp);
             hit_red.SetBool("hit", true);
-
             animator.SetTrigger("playerHit");
-
+            SoundManager.instance.efxSource.PlayOneShot(loseHpSound1);
+            
             CheckIfGameOver();
         }
 
@@ -169,9 +170,7 @@ namespace Completed
         private void CheckNote()
         {
             if (check.Check()) return;
-            hp--;
-            hp_ui.Lose(hp);
-            hit_red.SetBool("hit", true);
+            LoseHp(1);
         }
     }
 }
