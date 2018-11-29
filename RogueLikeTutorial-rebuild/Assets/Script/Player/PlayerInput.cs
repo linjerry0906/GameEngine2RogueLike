@@ -29,6 +29,8 @@ namespace Completed
         private Player_Hp_UI hp_ui;
         [SerializeField]
         private Animator hit_red;
+        [SerializeField]
+        private DistanceCheck check;
 
         protected override void Start()
         {
@@ -85,9 +87,7 @@ namespace Completed
         protected override void OnCantMove<T>(T component)
         {
             Destroyable hitWall = component as Destroyable;
-
-            hp_ui.Lose(2);
-            hit_red.SetBool("hit",true);
+            
             CheckAttack();//プレイヤーの攻撃力Check
             hitWall.Damaged(attack);//攻撃
 
@@ -167,7 +167,10 @@ namespace Completed
         //TODO:小川さんのCheckを呼び出し、HPを減らす
         private void CheckNote()
         {
-
+            if (check.Check()) return;
+            hp--;
+            hp_ui.Lose(hp);
+            hit_red.SetBool("hit", true);
         }
     }
 }
