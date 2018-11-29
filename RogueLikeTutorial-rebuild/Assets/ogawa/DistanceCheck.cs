@@ -17,7 +17,12 @@ public class DistanceCheck : MonoBehaviour
 
     private void Update()
     {
-        if (MusicManager.Instance[0].Peek() != null && MusicManager.Instance[0].Peek() != null)
+
+        if(Input.GetKeyDown(KeyCode.Space))
+        {
+            Debug.Log(Check());
+        }
+        if (MusicManager.Instance[0].Count > 0 && MusicManager.Instance[1].Count > 0)
         {
             var bar1 = MusicManager.Instance[0].Peek();
             var bar2 = MusicManager.Instance[1].Peek();
