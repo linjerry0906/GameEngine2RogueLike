@@ -11,13 +11,12 @@ namespace Completed
     };
 
     //Enemy inherits from MovingObject, our base class for objects that can move, Player also inherits from this.
-    public class Enemy : MovingObject
+    public class Enemy :MovingObject
     {
         [SerializeField] EnemyMove enemyMove;               //Enemyの行動
 
         public int playerDamage;                            //The amount of food points to subtract from the player when attacking.
         public int wallDamage = 1;                         //How much damage a player does to a wall when chopping it.
-        public int Enemy_HP;//**
         public AudioClip attackSound1;                      //First of two audio clips to play when attacking the player.
         public AudioClip attackSound2;                      //Second of two audio clips to play when attacking the player.
 
@@ -67,18 +66,22 @@ namespace Completed
 
         public void MoveEnemy()//**
         {
-            if (enemyMove == EnemyMove.LongDistance)
+            if (this.gameObject != null || this.gameObject.activeInHierarchy) 
             {
-                StartCoroutine(LongDistanceCoroutine());
+                if (enemyMove == EnemyMove.LongDistance)
+                {
+                    StartCoroutine(LongDistanceCoroutine());
+                }
+                else if (enemyMove == EnemyMove.Normal)
+                {
+                    StartCoroutine(NormalCoroutine());
+                }
+                else
+                {
+                    StartCoroutine(WallBreakCoroutine());
+                }
             }
-            else if (enemyMove == EnemyMove.Normal)
-            {
-                StartCoroutine(NormalCoroutine());
-            }
-            else
-            {
-                StartCoroutine(WallBreakCoroutine());
-            }
+            else { return; }
         }
 
         #region//   Normal
@@ -250,15 +253,6 @@ namespace Completed
             this.gameObject.GetComponent<SpriteRenderer>().color = Color.yellow;
             yield return new WaitForSeconds(1);
             this.gameObject.GetComponent<SpriteRenderer>().color = Color.white;
-        }
-
-        public virtual void HitDamage()//**
-        {
-            Enemy_HP--;
-            if (Enemy_HP >= 0)
-            {
-                Destroy(this);
-            }
         }
     }
 }

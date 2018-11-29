@@ -22,7 +22,6 @@ namespace Completed
 			spriteRenderer = GetComponent<SpriteRenderer> ();
 		}
 		
-		
 		//DamageWall is called when the player attacks a wall.
 		public void Damaged (int loss)
 		{
