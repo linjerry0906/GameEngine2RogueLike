@@ -73,7 +73,7 @@
 				colors[0] = _Color1;
 				colors[1] = _Color2;
 				fixed lerpVal = index % 2;
-				_CurrentLightUp %= 2;
+				_CurrentLightUp = _CurrentLightUp % 2;
 				lerpVal = abs(_CurrentLightUp - lerpVal);
 				colors[index] = lerp(colors[index], fixed4(1, 1, 1, 1), lerpVal);
 
