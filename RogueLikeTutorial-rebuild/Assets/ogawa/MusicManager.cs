@@ -94,4 +94,13 @@ public class MusicManager : MonoBehaviour
         Destroy(bar1);
         Destroy(bar2);
     }
+
+    public void Touched()
+    {
+        if (barBox1.Count == 0 || barBox2.Count == 0) return;
+        var bar1 = barBox1.Dequeue();
+        var bar2 = barBox2.Dequeue();
+        bar1.GetComponent<BarAnime>().TouchedDead();
+        bar2.GetComponent<BarAnime>().TouchedDead();
+    }
 }
