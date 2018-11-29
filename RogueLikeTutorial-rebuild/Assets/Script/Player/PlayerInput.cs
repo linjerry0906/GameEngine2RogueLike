@@ -89,7 +89,7 @@ namespace Completed
             
             CheckAttack();//プレイヤーの攻撃力Check
             hitWall.Damaged(attack);//攻撃
-            attack_particle.transform.position = transform.position;
+            attack_particle.transform.localScale = transform.localScale;
             attack_particle.Play();
             animator.SetTrigger("playerChop");
         }
