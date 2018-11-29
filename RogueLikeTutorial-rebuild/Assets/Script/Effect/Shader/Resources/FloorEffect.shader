@@ -68,7 +68,7 @@
 			fixed4 frag (v2f i) : SV_Target
 			{
 				UNITY_SETUP_INSTANCE_ID(i);
-				int index = UNITY_ACCESS_INSTANCED_PROP(Props, _ColorIndex);
+				uint index = UNITY_ACCESS_INSTANCED_PROP(Props, _ColorIndex);
 				fixed4 colors[2];
 				colors[0] = _Color1;
 				colors[1] = _Color2;
