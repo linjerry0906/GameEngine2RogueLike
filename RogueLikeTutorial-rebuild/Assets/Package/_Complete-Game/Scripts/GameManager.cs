@@ -1,21 +1,20 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using System.Collections.Generic;		//Allows us to use Lists. 
 
 namespace Completed
 {
-	using System.Collections.Generic;		//Allows us to use Lists. 
 	using UnityEngine.UI;					//Allows us to use UI.
 	
 	public class GameManager : MonoBehaviour
 	{
-		public float levelStartDelay = 2f;						//Time to wait before starting level, in seconds.
+		//public float levelStartDelay = 2f;						//Time to wait before starting level, in seconds.
 		public float turnDelay = 0.1f;							//Delay between each Player turn.
 		public int playerFoodPoints = 100;						//Starting value for Player food points.
 		public static GameManager instance = null;				//Static instance of GameManager which allows it to be accessed by any other script.
 		[HideInInspector] public bool playersTurn = true;		//Boolean to check if it's players turn, hidden in inspector but public.
-		
-		
+				
 		private Text levelText;									//Text to display current level number.
 		private GameObject levelImage;							//Image to block out level as levels are being set up, background for levelText.
 		private BoardManager boardScript;						//Store a reference to our BoardManager which will set up the level.
@@ -23,8 +22,6 @@ namespace Completed
 		private List<Enemy> enemies;							//List of all Enemy units, used to issue them move commands.
 		private bool enemiesMoving;								//Boolean to check if enemies are moving.
 		private bool doingSetup = true;							//Boolean to check if we're setting up board, prevent Player from moving during setup.
-		
-		
 		
 		//Awake is always called before any Start functions
 		void Awake()
@@ -90,20 +87,24 @@ namespace Completed
 			levelImage.SetActive(true);
 			
 			//Call the HideLevelImage function with a delay in seconds of levelStartDelay.
-			Invoke("HideLevelImage", levelStartDelay);
+			//Invoke("HideLevelImage", levelStartDelay);
 			
 			//Clear any Enemy objects in our List to prepare for next level.
 			enemies.Clear();
 			
 			//Call the SetupScene function of the BoardManager script, pass it current level number.
 			boardScript.SetupScene(level);
-			
+
+			StartCoroutine(HideLevelImage());	
 		}
 		
 		
 		//Hides black image used between levels
-		void HideLevelImage()
+		IEnumerator HideLevelImage()
 		{
+			while(!boardScript.IsSetup())
+				yield return null;
+
 			//Disable the levelImage gameObject.
 			levelImage.SetActive(false);
 			
@@ -155,7 +156,7 @@ namespace Completed
 			yield return new WaitForSeconds(turnDelay);
 			
 			//If there are no enemies spawned (IE in first level):
-			if (enemies.Count == 0) 
+			if (enemies.Count == 0)
 			{
 				//Wait for turnDelay seconds between moves, replaces delay caused by enemies moving when there are none.
 				yield return new WaitForSeconds(turnDelay);

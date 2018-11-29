@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System;
+using System.Collections;
 using System.Collections.Generic; 		//Allows us to use Lists.
 using Random = UnityEngine.Random; 		//Tells Random to use the Unity Engine random number generator.
 
@@ -25,7 +26,8 @@ namespace Completed
 			}
 		}
 		
-		
+		[SerializeField] private int mapSize = 100;
+		public float lightPercent = 0.01f;
 		public int columns = 8; 										//Number of columns in our game board.
 		public int rows = 8;											//Number of rows in our game board.
 		public Count wallCount = new Count (5, 9);						//Lower and upper limit for our random number of walls per level.
@@ -35,10 +37,13 @@ namespace Completed
 		public GameObject[] wallTiles;									//Array of wall prefabs.
 		public GameObject[] foodTiles;									//Array of food prefabs.
 		public GameObject[] enemyTiles;									//Array of enemy prefabs.
-		public GameObject[] outerWallTiles;								//Array of outer tile prefabs.
+		public GameObject[] outerWallTiles;								//Array of outer tile prefabs.2
+		public GameObject lightTile;
 		
 		private Transform boardHolder;									//A variable to store a reference to the transform of our Board object.
 		private List <Vector3> gridPositions = new List <Vector3> ();	//A list of possible locations to place tiles.
+
+		private bool isSetup = false;
 		
 		
 		//Clears our list gridPositions and prepares it to generate a new board.
@@ -53,6 +58,24 @@ namespace Completed
 				//Within each column, loop through y axis (rows).
 				for(int y = 1; y < rows-1; y++)
 				{
+					//At each index add a new Vector3 to our list with the x and y coordinates of that position.
+					gridPositions.Add (new Vector3(x, y, 0f));
+				}
+			}
+		}
+
+		void InitialiseList (int[,] chip)
+		{
+			//Clear our list gridPositions.
+			gridPositions.Clear ();
+			
+			//Loop through x axis (columns).
+			for(int x = 0; x < chip.GetLength(1); ++x)
+			{
+				//Within each column, loop through y axis (rows).
+				for(int y = 0; y < chip.GetLength(0); ++y)
+				{
+					if(chip[y, x] != (int)BlockDef.Space) continue;
 					//At each index add a new Vector3 to our list with the x and y coordinates of that position.
 					gridPositions.Add (new Vector3(x, y, 0f));
 				}
@@ -85,6 +108,46 @@ namespace Completed
 					
 					//Set the parent of our newly instantiated object instance to boardHolder, this is just organizational to avoid cluttering hierarchy.
 					instance.transform.SetParent (boardHolder);
+				}
+			}
+		}
+
+		void BoardSetup (int[,] chip)
+		{
+			//Instantiate Board and set boardHolder to its transform.
+			boardHolder = new GameObject ("Board").transform;
+			
+			//Loop along x axis, starting from -1 (to fill corner) with floor or outerwall edge tiles.
+			for(int x = 0; x < chip.GetLength(1); ++x)
+			{
+				//Loop along y axis, starting from -1 to place floor or outerwall tiles.
+				for(int y = 0; y < chip.GetLength(0); ++y)
+				{
+					//Choose a random tile from our array of floor tile prefabs and prepare to instantiate it.
+					GameObject toInstantiate = floorTiles[Random.Range (0,floorTiles.Length)];
+					
+					//Check if we current position is at board edge, if so choose a random outer wall prefab from our array of outer wall tiles.
+					if(chip[y, x] == (int)BlockDef.Wall)
+					{
+						toInstantiate = outerWallTiles [Random.Range (0, outerWallTiles.Length)];
+						if(Random.value < lightPercent)
+							toInstantiate = lightTile;
+					}
+					
+					//Instantiate the GameObject instance using the prefab chosen for toInstantiate at the Vector3 corresponding to current grid position in loop, cast it to GameObject.
+					GameObject instance =
+						Instantiate (toInstantiate, new Vector3 (x, y, 0f), Quaternion.identity) as GameObject;
+					
+					//Set the parent of our newly instantiated object instance to boardHolder, this is just organizational to avoid cluttering hierarchy.
+					instance.transform.SetParent (boardHolder);
+
+					if(chip[y, x] == (int)BlockDef.Exit)
+						Instantiate (exit, new Vector3 (x, y, 0f), Quaternion.identity);
+					if(chip[y, x] == (int)BlockDef.Entry)
+					{
+						GameObject.FindGameObjectWithTag("Player").transform.position = new Vector3 (x, y, 0f);
+						Camera.main.GetComponent<CameraTrace>().Init();
+					}
 				}
 			}
 		}
@@ -131,11 +194,26 @@ namespace Completed
 		//SetupScene initializes our level and calls the previous functions to lay out the game board
 		public void SetupScene (int level)
 		{
+			isSetup = false;
+			StartCoroutine(Setup(level));
+		}
+
+		private IEnumerator Setup(int level)
+		{
+			MapGenerator mapGenerator = new MapGenerator(mapSize);
+			while(!mapGenerator.IsEnd())
+			{
+				mapGenerator.Update();
+				yield return null;
+			}
+
+			int[,] chip = mapGenerator.MapChip;
+
 			//Creates the outer walls and floor.
-			BoardSetup ();
+			BoardSetup (chip);
 			
 			//Reset our list of gridpositions.
-			InitialiseList ();
+			InitialiseList (chip);
 			
 			//Instantiate a random number of wall tiles based on minimum and maximum, at randomized positions.
 			LayoutObjectAtRandom (wallTiles, wallCount.minimum, wallCount.maximum);
@@ -144,13 +222,21 @@ namespace Completed
 			LayoutObjectAtRandom (foodTiles, foodCount.minimum, foodCount.maximum);
 			
 			//Determine number of enemies based on current level number, based on a logarithmic progression
-			int enemyCount = (int)Mathf.Log(level, 2f);
+			int enemyCount = (int)(Mathf.Log(level, 2f) + mapSize / 10);
 			
 			//Instantiate a random number of enemies based on minimum and maximum, at randomized positions.
 			LayoutObjectAtRandom (enemyTiles, enemyCount, enemyCount);
+
 			
 			//Instantiate the exit tile in the upper right hand corner of our game board
-			Instantiate (exit, new Vector3 (columns - 1, rows - 1, 0f), Quaternion.identity);
+			//Instantiate (exit, new Vector3 (columns - 1, rows - 1, 0f), Quaternion.identity);
+
+			isSetup = true;
+		}
+
+		public bool IsSetup()
+		{
+			return isSetup;
 		}
 	}
 }

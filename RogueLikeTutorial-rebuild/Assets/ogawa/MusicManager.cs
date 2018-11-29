@@ -14,7 +14,6 @@ public class MusicManager : MonoBehaviour
     [SerializeField] GameObject[] generateObj;
     [SerializeField] float barSpeed;
     [SerializeField] float interval;
-    [SerializeField] float interval2;
     [SerializeField] HeartMove heartMove;
     [SerializeField] DistanceCheck distanceCheck;
 

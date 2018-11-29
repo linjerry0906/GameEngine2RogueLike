@@ -32,6 +32,7 @@ public class LightEffect : MonoBehaviour
 
 		lightMapMaterial.SetTexture ("_EmissionMap", emissionMap);
 		lightMapMaterial.SetTexture ("_Light", lightMap);
+		SetBlendOffset(Vector3.zero);
 		StartCoroutine(UpdateFrameBuffer(updateSpeed));
 	}
 
@@ -39,6 +40,7 @@ public class LightEffect : MonoBehaviour
 	{
 		RenderTexture rt = RenderTexture.GetTemporary (Screen.width, Screen.height);
 		rt.wrapMode = TextureWrapMode.Clamp;
+		rt.filterMode = FilterMode.Point;
 
 		return rt;
 	}
@@ -53,6 +55,12 @@ public class LightEffect : MonoBehaviour
 			currentBuffer %= buffers.Count;
 		}
 	}
+
+	public void SwitchBuffer()
+	{
+		currentBuffer++;
+		currentBuffer %= buffers.Count;
+	}
 	
 	void OnRenderImage(RenderTexture src,RenderTexture dest)
     {
@@ -66,4 +74,9 @@ public class LightEffect : MonoBehaviour
 		lightMapMaterial.SetTexture ("_LightMap", buffers[currentBuffer]);
 		Graphics.Blit (src, dest, lightMapMaterial, 1);
     }
+
+	public void SetBlendOffset(Vector3 offset)
+	{
+		lightMapMaterial.SetVector("_BlendOffSet", new Vector4(offset.x, offset.y, offset.z, 0));
+	}
 }
