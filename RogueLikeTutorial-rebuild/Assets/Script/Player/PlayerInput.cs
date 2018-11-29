@@ -19,9 +19,9 @@ namespace Completed
         public AudioClip moveSound1;                //1 of 2 Audio clips to play when player moves.
         public AudioClip moveSound2;                //2 of 2 Audio clips to play when player moves.
         public AudioClip recoverSound1;                 //1 of 2 Audio clips to play when player collects a food object.
-        public AudioClip recoverSound2;                 //2 of 2 Audio clips to play when player collects a food object.
+        public AudioClip recoverSound2;                 //1 of 2 Audio clips to play when player collects a food object.
         public AudioClip attackItemSound1;               //1 of 2 Audio clips to play when player collects a soda object.
-        public AudioClip attackItemSound2;               //2 of 2 Audio clips to play when player collects a soda object.
+        public AudioClip attackItemSound2;               //1 of 2 Audio clips to play when player collects a soda object.
         public AudioClip gameOverSound;             //Audio clip to play when player dies.
 
         private Animator animator;                  //Used to store a reference to the Player's animator component.
@@ -29,6 +29,8 @@ namespace Completed
         private Player_Hp_UI hp_ui;
         [SerializeField]
         private Animator hit_red;
+        [SerializeField]
+        private DistanceCheck check;
 
         protected override void Start()
         {
@@ -85,9 +87,7 @@ namespace Completed
         protected override void OnCantMove<T>(T component)
         {
             Destroyable hitWall = component as Destroyable;
-
-            hp_ui.Lose(2);
-            hit_red.SetBool("hit",true);
+            
             CheckAttack();//プレイヤーの攻撃力Check
             hitWall.Damaged(attack);//攻撃
 
@@ -167,7 +167,10 @@ namespace Completed
         //TODO:小川さんのCheckを呼び出し、HPを減らす
         private void CheckNote()
         {
-
+            if (check.Check()) return;
+            hp--;
+            hp_ui.Lose(hp);
+            hit_red.SetBool("hit", true);
         }
     }
 }
