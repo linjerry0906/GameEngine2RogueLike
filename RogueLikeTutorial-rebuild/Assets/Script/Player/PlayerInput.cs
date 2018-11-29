@@ -90,6 +90,7 @@ namespace Completed
             Destroyable hitWall = component as Destroyable;
             
             CheckAttack();//プレイヤーの攻撃力Check
+            hitWall.Damaged(attack);//攻撃
             if (attack == 1)
             {
                 attack_particle.transform.localScale = transform.localScale;
@@ -100,7 +101,6 @@ namespace Completed
                 attackUP_particle.transform.localScale = transform.localScale;
                 attackUP_particle.Play();
             }
-            hitWall.Damaged(attack);//攻撃
             animator.SetTrigger("playerChop");
         }
 
