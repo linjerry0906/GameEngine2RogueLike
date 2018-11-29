@@ -27,10 +27,10 @@ namespace Completed
 
         //  次に行動できるまでのターン数//**
         public int skipCount;
-        private int currentCount;
+        private int currentCount = 0;
 
         //  遠距離攻撃のリミットターン数//**
-        private int longAttack;
+        private int longAttack = 0;
 
         //Start overrides the virtual Start function of the base class.
         protected override void Start()
@@ -47,8 +47,6 @@ namespace Completed
             Player_Object = GameObject.FindGameObjectWithTag("Player");
             targetWall = GameObject.FindGameObjectWithTag("Wall").transform;//**
 
-            currentCount = 0;
-            longAttack = 0;
             //Call the start function of our base class MovingObject.
             base.Start();
         }
@@ -184,9 +182,11 @@ namespace Completed
             #region// Move
             if (Mathf.Abs(targetPlayer.position.x - transform.position.x) < Mathf.Abs(targetPlayer.position.y - transform.position.y))
             {
-                //  Stay-Attack(Playerが10x10の範囲内に居たら)
-                if ((Mathf.Abs(targetPlayer.position.x - transform.position.x) < 5 && Mathf.Abs(targetPlayer.position.y - transform.position.y) < 5) &&
-                    (targetPlayer.position.x == transform.position.x || targetPlayer.position.y == transform.position.y))
+                //  Stay-Attack(Playerが6x6の範囲内に居たら)
+                if ((Mathf.Abs(targetPlayer.position.x - transform.position.x) < 3 &&
+                    Mathf.Abs(targetPlayer.position.y - transform.position.y) < 3) &&
+                    (targetPlayer.position.x == transform.position.x ||
+                    targetPlayer.position.y == transform.position.y))
                 {
                     longAttack++; yDir = 0;
                     this.gameObject.GetComponent<SpriteRenderer>().color = Color.yellow;
@@ -199,9 +199,11 @@ namespace Completed
             }
             else
             {
-                //  Stay-Attack
-                if ((Mathf.Abs(targetPlayer.position.x - transform.position.x) < 5 && Mathf.Abs(targetPlayer.position.y - transform.position.y) < 5) &&
-                    (targetPlayer.position.x == transform.position.x || targetPlayer.position.y == transform.position.y))
+                //  Stay-Attack(Playerが6x6の範囲内に居たら)
+                if ((Mathf.Abs(targetPlayer.position.x - transform.position.x) < 3 &&
+                    Mathf.Abs(targetPlayer.position.y - transform.position.y) < 3) &&
+                    (targetPlayer.position.x == transform.position.x ||
+                    targetPlayer.position.y == transform.position.y))
                 {
                     longAttack++; xDir = 0;
                     this.gameObject.GetComponent<SpriteRenderer>().color = Color.yellow;
@@ -227,6 +229,7 @@ namespace Completed
                 longAttack = 0;
                 this.gameObject.GetComponent<SpriteRenderer>().color = Color.white;
             }
+            else { }
             #endregion
 
             AttemptMove<PlayerInput>(xDir, yDir);
