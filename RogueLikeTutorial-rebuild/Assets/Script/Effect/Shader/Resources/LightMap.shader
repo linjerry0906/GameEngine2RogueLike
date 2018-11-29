@@ -7,7 +7,6 @@
 		_OldFrame ("OldFrame", 2D) = "white" {}
 		_BlendOffSet ("BlendOffSet", Vector) = (0, 0, 0, 0)
 		
-		_SampleCount ("SampleCount", Int) = 3
 		_Brightness ("Brightness", Float) = 1.0
 		_BlendRateLast ("BlendRateLast", Range(0, 1)) = 0.5
 		_BlendRateOld ("BlendRateOld", Range(0, 1)) = 0.3
@@ -51,7 +50,8 @@
 			float _Brightness;
 			float _resoX;
 			float _resoY;
-			float _SampleCount;
+			static const float _SampleCount = 6.0;
+			static const float _TotalSample = 13.0;
 			float _BlendRateLast;
 			float _BlendRateOld;
 			float4 _BlendOffSet;
@@ -61,12 +61,14 @@
 				fixed4 light = fixed4(0, 0, 0, 0);
 				float2 gridSize = float2(_resoX / 16.0, _resoY / 10.0);
 				float2 size = float2(gridSize.x /_resoX, gridSize.y / _resoY);
-				for(float y = -_SampleCount; y <= _SampleCount; ++y)
+				for(fixed y = 0; y <= _TotalSample; ++y)
 				{
-					for(float x = -_SampleCount; x <= _SampleCount; ++x)
+					for(fixed x = 0; x <= _TotalSample; ++x)
 					{
-						fixed effective = clamp((_SampleCount + 1) - (abs(x) + abs(y)), 0, _SampleCount + 1);
-						fixed2 offset = i.uv + fixed2(x * size.x, y * size.y);
+						fixed sampleX = x - _SampleCount;
+						fixed sampleY = y - _SampleCount;
+						fixed effective = clamp((_SampleCount + 1) - (abs(sampleX) + abs(sampleY)), 0, _SampleCount + 1);
+						fixed2 offset = i.uv + fixed2(sampleX * size.x, sampleY * size.y);
 						fixed4 color = tex2D(_Light, offset) * effective * effective;
 						//color = offset.x > 1 ? fixed4(0, 0, 0, 0) : color;
 						//color = offset.x < 0 ? fixed4(0, 0, 0, 0) : color;
@@ -75,7 +77,7 @@
 						light += color;
 					}
 				}
-				light /= (_SampleCount * 2 + 1) * (_SampleCount * 2 + 1);
+				light /= _TotalSample * _TotalSample;
 				float2 blendOffset = float2(_BlendOffSet.x * size.x, _BlendOffSet.y * size.y);
 				fixed4 lastFrame = tex2D(_LastFrame, i.uv + blendOffset);
 				fixed4 oldFrame = tex2D(_OldFrame, i.uv + blendOffset);

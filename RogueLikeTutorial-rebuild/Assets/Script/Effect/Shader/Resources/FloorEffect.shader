@@ -75,12 +75,15 @@
 				uint lerpVal = index % 2;
 				_CurrentLightUp = _CurrentLightUp % 2;
 				lerpVal = abs(_CurrentLightUp - lerpVal);
-				colors[index] = lerp(colors[index], fixed4(1, 1, 1, 1), lerpVal);
+				//colors[index] = lerp(colors[index], fixed4(1, 1, 1, 1), lerpVal);
+				colors[0] = index == 0 ? lerp(colors[0], fixed4(1, 1, 1, 1), lerpVal) : colors[0];
+				colors[1] = index == 1 ? lerp(colors[1], fixed4(1, 1, 1, 1), lerpVal) : colors[1];
+				fixed4 currentColor = index == 0 ? colors[0] : colors[1];
 
 				fixed4 texOrign = tex2D(_MainTex, i.uv);
 				fixed4 grid = tex2D(_GridTex, i.uv);
-				fixed4 finalGrid = texOrign * colors[index];
-				finalGrid = lerp(finalGrid, grid * colors[index], grid.a * (1 - lerpVal) * _GridAlpha);
+				fixed4 finalGrid = texOrign * currentColor;
+				finalGrid = lerp(finalGrid, grid * currentColor, grid.a * (1 - lerpVal) * _GridAlpha);
 				fixed4 col = lerp(texOrign, finalGrid, _EffectValue) * _Emission;
 				return col;
 			}
