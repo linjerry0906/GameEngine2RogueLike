@@ -30,6 +30,8 @@ namespace Completed
         private DistanceCheck check;
         [SerializeField]
         private ParticleSystem attack_particle;
+        [SerializeField]
+        private ParticleSystem attackUP_particle;
 
         protected override void Start()
         {
@@ -88,9 +90,17 @@ namespace Completed
             Destroyable hitWall = component as Destroyable;
             
             CheckAttack();//プレイヤーの攻撃力Check
+            if (attack == 1)
+            {
+                attack_particle.transform.localScale = transform.localScale;
+                attack_particle.Play();
+            }
+            if (attack == 2)
+            {
+                attackUP_particle.transform.localScale = transform.localScale;
+                attackUP_particle.Play();
+            }
             hitWall.Damaged(attack);//攻撃
-            attack_particle.transform.localScale = transform.localScale;
-            attack_particle.Play();
             animator.SetTrigger("playerChop");
         }
 
