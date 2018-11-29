@@ -11,7 +11,7 @@ namespace Completed
     };
 
     //Enemy inherits from MovingObject, our base class for objects that can move, Player also inherits from this.
-    public class Enemy :MovingObject
+    public class Enemy : MovingObject
     {
         [SerializeField] EnemyMove enemyMove;               //Enemyの行動
 
@@ -27,10 +27,10 @@ namespace Completed
 
         //  次に行動できるまでのターン数//**
         public int skipCount;
-        private int currentCount;
+        private int currentCount = 0;
 
         //  遠距離攻撃のリミットターン数//**
-        private int longAttack;
+        private int longAttack = 0;
 
         //Start overrides the virtual Start function of the base class.
         protected override void Start()
@@ -47,8 +47,6 @@ namespace Completed
             Player_Object = GameObject.FindGameObjectWithTag("Player");
             targetWall = GameObject.FindGameObjectWithTag("Wall").transform;//**
 
-            currentCount = 0;
-            longAttack = 0;
             //Call the start function of our base class MovingObject.
             base.Start();
         }
@@ -66,7 +64,7 @@ namespace Completed
 
         public void MoveEnemy()//**
         {
-            if (this.gameObject != null || this.gameObject.activeInHierarchy) 
+            if (this.gameObject.activeInHierarchy == true)
             {
                 if (enemyMove == EnemyMove.LongDistance)
                 {
@@ -102,9 +100,12 @@ namespace Completed
 
             //  Player.X != Enemy.X
             else
+            {
                 xDir = targetPlayer.position.x > transform.position.x ? 1 : -1;
+                this.gameObject.transform.localScale = new Vector3(xDir * -1, 1, 1);//  左右反転
+            }
 
-            AttemptMove<Player>(xDir, yDir);
+            AttemptMove<PlayerInput>(xDir, yDir);
 
             #endregion
         }
@@ -136,8 +137,10 @@ namespace Completed
 
                 //  Wall.X != Enemy.X
                 else
-                    xDir = targetWall.position.x > transform.position.x ? 1 : -1;
-
+                {
+                    xDir = targetPlayer.position.x > transform.position.x ? 1 : -1;
+                    this.gameObject.transform.localScale = new Vector3(xDir * -1, 1, 1);//  左右反転
+                }
                 AttemptMove<Destroyable>(xDir, yDir);
 
             }
@@ -156,9 +159,11 @@ namespace Completed
 
                 //  Player.X != Enemy.X
                 else
+                {
                     xDir = targetPlayer.position.x > transform.position.x ? 1 : -1;
-
-                AttemptMove<Player>(xDir, yDir);
+                    this.gameObject.transform.localScale = new Vector3(xDir * -1, 1, 1);//  左右反転
+                }
+                AttemptMove<PlayerInput>(xDir, yDir);
             }
             #endregion
         }
@@ -177,30 +182,46 @@ namespace Completed
             #region// Move
             if (Mathf.Abs(targetPlayer.position.x - transform.position.x) < Mathf.Abs(targetPlayer.position.y - transform.position.y))
             {
-                //  Stay-Attack
-                if (targetPlayer.position.x == transform.position.x || targetPlayer.position.y == transform.position.y)
-                { longAttack++; yDir = 0;
-                    this.gameObject.GetComponent<SpriteRenderer>().color = Color.yellow; }
+                //  Stay-Attack(Playerが6x6の範囲内に居たら)
+                if ((Mathf.Abs(targetPlayer.position.x - transform.position.x) < 3 &&
+                    Mathf.Abs(targetPlayer.position.y - transform.position.y) < 3) &&
+                    (targetPlayer.position.x == transform.position.x ||
+                    targetPlayer.position.y == transform.position.y))
+                {
+                    longAttack++; yDir = 0;
+                    this.gameObject.GetComponent<SpriteRenderer>().color = Color.yellow;
+                }
                 else
-                { yDir = targetPlayer.position.y > transform.position.y ? 1 : -1;longAttack = 0;
+                {
+                    yDir = targetPlayer.position.y > transform.position.y ? 1 : -1; longAttack = 0;
                     this.gameObject.GetComponent<SpriteRenderer>().color = Color.white;
                 }
             }
             else
             {
-                //  Stay-Attack
-                if (targetPlayer.position.x == transform.position.x || targetPlayer.position.y == transform.position.y)
-                { longAttack++; xDir = 0;
-                    this.gameObject.GetComponent<SpriteRenderer>().color = Color.yellow; }
+                //  Stay-Attack(Playerが6x6の範囲内に居たら)
+                if ((Mathf.Abs(targetPlayer.position.x - transform.position.x) < 3 &&
+                    Mathf.Abs(targetPlayer.position.y - transform.position.y) < 3) &&
+                    (targetPlayer.position.x == transform.position.x ||
+                    targetPlayer.position.y == transform.position.y))
+                {
+                    longAttack++; xDir = 0;
+                    this.gameObject.GetComponent<SpriteRenderer>().color = Color.yellow;
+                }
                 else
-                { xDir = targetPlayer.position.x > transform.position.x ? 1 : -1;longAttack = 0;
+                {
+                    xDir = targetPlayer.position.x > transform.position.x ? 1 : -1;
+                    this.gameObject.transform.localScale = new Vector3(xDir * -1, 1, 1);//  左右反転
+
+                    longAttack = 0;
                     this.gameObject.GetComponent<SpriteRenderer>().color = Color.white;
                 }
             }
 
+            #region//   Attack
             if (longAttack >= 2)
             {
-                Player_Object.GetComponent<Player>().LoseFood(playerDamage);
+                Player_Object.GetComponent<PlayerInput>().LoseHp(playerDamage);
                 animator.SetTrigger("enemyAttack");
 
                 SoundManager.instance.RandomizeSfx(attackSound1, attackSound2);
@@ -208,8 +229,10 @@ namespace Completed
                 longAttack = 0;
                 this.gameObject.GetComponent<SpriteRenderer>().color = Color.white;
             }
+            else { }
+            #endregion
 
-            AttemptMove<Player>(xDir, yDir);
+            AttemptMove<PlayerInput>(xDir, yDir);
 
             #endregion
         }
@@ -220,9 +243,9 @@ namespace Completed
             #region// component==Player
             if (component.tag == "Player")
             {
-                Player hitPlayer = component as Player;
+                PlayerInput hitPlayer = component as PlayerInput;
 
-                hitPlayer.LoseFood(playerDamage);
+                hitPlayer.LoseHp(playerDamage);
 
                 animator.SetTrigger("enemyAttack");
 

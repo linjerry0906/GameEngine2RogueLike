@@ -54,12 +54,12 @@ public class DistanceCheck : MonoBehaviour
 
         if (bar1_heartDis < successDis && bar2_heartDis < successDis)
         {
-            MusicManager.Instance.Dequeue();
+            MusicManager.Instance.Touched();
             return true;
         }
         else
         {
-            MusicManager.Instance.Dequeue();
+            MusicManager.Instance.Touched();
             return false;
         }
     }
