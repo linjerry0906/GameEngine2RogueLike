@@ -73,14 +73,16 @@ namespace Completed
         //移動＋移動しようとする場所にオブジェクトがあれば攻撃
         protected override void AttemptMove<T>(int xDir, int yDir)
         {
-            base.AttemptMove<T>(xDir, yDir);
-
+            //移動判定後、攻撃判断
+            //攻撃した後、移動しない
             RaycastHit2D hit;
 
             if (Move(xDir, yDir, out hit))
             {
                 SoundManager.instance.efxSource.PlayOneShot(moveSound1);
             }
+            
+            base.AttemptMove<T>(xDir, yDir);
 
             GameManager.instance.playersTurn = false;
         }
