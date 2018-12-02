@@ -93,11 +93,13 @@ namespace Completed
             hitWall.Damaged(attack);//攻撃
             if (attack == 1)
             {
+                attack_particle.transform.position = hitWall.transform.position;
                 attack_particle.transform.localScale = transform.localScale;
                 attack_particle.Play();
             }
             if (attack == 2)
             {
+                attackUP_particle.transform.position = hitWall.transform.position;
                 attackUP_particle.transform.localScale = transform.localScale;
                 attackUP_particle.Play();
             }
