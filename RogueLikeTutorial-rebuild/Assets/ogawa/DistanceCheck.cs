@@ -9,6 +9,8 @@ public class DistanceCheck : MonoBehaviour
     [SerializeField] float successDis;
     bool isSuccess;
 
+    public static bool isMove = true;
+
     // Use this for initialization
     void Start()
     {
@@ -33,8 +35,10 @@ public class DistanceCheck : MonoBehaviour
 
                 if (bar1_bar2 > outDis)
                 {
+                    isMove = true;
                     MusicManager.Instance.Dequeue();
                 }
+                else { isMove = false; }
             }
         }
     }

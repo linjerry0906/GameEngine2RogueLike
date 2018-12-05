@@ -115,14 +115,22 @@ namespace Completed
 		//Update is called every frame.
 		void Update()
 		{
-			//Check that playersTurn or enemiesMoving or doingSetup are not currently true.
-			if(playersTurn || enemiesMoving || doingSetup)
-				
+            Debug.Log(playersTurn);
+            if (playersTurn)
+            {
+                
+            }
+            else StartCoroutine(PlayerMove());
+
+            //Check that playersTurn or enemiesMoving or doingSetup are not currently true.
+            if (DistanceCheck.isMove || enemiesMoving || doingSetup)
+            {
 				//If any of these are true, return and do not start MoveEnemies.
 				return;
-			
-			//Start moving enemies.
-			StartCoroutine (MoveEnemies ());
+            }
+            //Start moving enemies.
+            else StartCoroutine(MoveEnemies());
+                       
 		}
 		
 		//Call this to add the passed in Enemy to the List of Enemy objects.
@@ -131,8 +139,7 @@ namespace Completed
 			//Add Enemy to List enemies.
 			enemies.Add(script);
 		}
-		
-		
+				
 		//GameOver is called when the player reaches 0 food points
 		public void GameOver()
 		{
@@ -146,6 +153,13 @@ namespace Completed
 			enabled = false;
 		}
 		
+        IEnumerator PlayerMove()
+        {
+            yield return new WaitForSeconds(0.5f);
+
+            playersTurn = true;
+        }
+
 		//Coroutine to move enemies in sequence.
 		IEnumerator MoveEnemies()
 		{
