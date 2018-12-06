@@ -19,6 +19,8 @@ public class MusicManager : MonoBehaviour
     [SerializeField] DistanceCheck distanceCheck;
     [SerializeField] AudioClip clip;
 
+    public static bool isMove = true;
+
     public static MusicManager Instance { get { return instance; } }
     public float BarSpeed { get { return barSpeed; } }
     public Queue<GameObject> this[int index]
@@ -57,6 +59,7 @@ public class MusicManager : MonoBehaviour
             StartCoroutine(heartMove.Move(interval));
             isMoving = true;
         }
+        isMove = true;
     }
 
     IEnumerator Generate()
@@ -92,6 +95,7 @@ public class MusicManager : MonoBehaviour
         var bar2 = barBox2.Dequeue();
         Destroy(bar1);
         Destroy(bar2);
+        isMove = false;
     }
 
     public void Touched()
@@ -101,5 +105,6 @@ public class MusicManager : MonoBehaviour
         var bar2 = barBox2.Dequeue();
         bar1.GetComponent<BarAnime>().TouchedDead();
         bar2.GetComponent<BarAnime>().TouchedDead();
+        isMove = false;
     }
 }

@@ -10,7 +10,7 @@ namespace Completed
 	public class GameManager : MonoBehaviour
 	{
 		//public float levelStartDelay = 2f;						//Time to wait before starting level, in seconds.
-		public float turnDelay = 0.1f;							//Delay between each Player turn.
+		public float turnDelay = 0.05f;							//Delay between each Player turn.
 		public int playerFoodPoints = 100;						//Starting value for Player food points.
 		public static GameManager instance = null;				//Static instance of GameManager which allows it to be accessed by any other script.
 		[HideInInspector] public bool playersTurn = true;		//Boolean to check if it's players turn, hidden in inspector but public.
@@ -107,7 +107,7 @@ namespace Completed
 
 			//Disable the levelImage gameObject.
 			levelImage.SetActive(false);
-			
+            MusicManager.isMove = true;
 			//Set doingSetup to false allowing player to move again.
 			doingSetup = false;
 		}
@@ -115,7 +115,6 @@ namespace Completed
 		//Update is called every frame.
 		void Update()
 		{
-            Debug.Log(playersTurn);
             if (playersTurn)
             {
                 
@@ -123,7 +122,7 @@ namespace Completed
             else StartCoroutine(PlayerMove());
 
             //Check that playersTurn or enemiesMoving or doingSetup are not currently true.
-            if (DistanceCheck.isMove || enemiesMoving || doingSetup)
+            if (MusicManager.isMove || enemiesMoving || doingSetup)
             {
 				//If any of these are true, return and do not start MoveEnemies.
 				return;
@@ -167,13 +166,13 @@ namespace Completed
 			enemiesMoving = true;
 			
 			//Wait for turnDelay seconds, defaults to .1 (100 ms).
-			yield return new WaitForSeconds(turnDelay);
+			//yield return new WaitForSeconds(turnDelay);
 			
 			//If there are no enemies spawned (IE in first level):
 			if (enemies.Count == 0)
 			{
 				//Wait for turnDelay seconds between moves, replaces delay caused by enemies moving when there are none.
-				yield return new WaitForSeconds(turnDelay);
+				//yield return new WaitForSeconds(turnDelay);
 			}
 			
 			//Loop through List of Enemy objects.
@@ -187,7 +186,7 @@ namespace Completed
 			}
 			//Once Enemies are done moving, set playersTurn to true so player can move.
 			playersTurn = true;
-			
+
 			//Enemies are done moving, set enemiesMoving to false.
 			enemiesMoving = false;
 		}
