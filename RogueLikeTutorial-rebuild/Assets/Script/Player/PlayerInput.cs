@@ -33,6 +33,8 @@ namespace Completed
         [SerializeField]
         private ParticleSystem attackUP_particle;
 
+        private bool input_once = true;
+
         protected override void Start()
         {
             animator = GetComponent<Animator>();
@@ -53,10 +55,12 @@ namespace Completed
             if (!GameManager.instance.playersTurn) return;
 
             int horizontal = 0;     
-            int vertical = 0;       
+            int vertical = 0;
 
-            horizontal = (int)(Input.GetAxisRaw("Horizontal"));
-            vertical = (int)(Input.GetAxisRaw("Vertical"));
+            if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow)) horizontal = -1;
+            if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow)) horizontal = 1;
+            if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)) vertical = 1;
+            if (Input.GetKeyDown(KeyCode.S)|| Input.GetKeyDown(KeyCode.DownArrow)) vertical = -1;
 
             //Animatorの左右回転
             FlipAnimation(horizontal);
